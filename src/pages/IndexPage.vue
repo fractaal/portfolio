@@ -12,7 +12,7 @@
         autoplay
         loop
         muted
-        src="~assets/vfx.mp4"
+        src="~assets/smaller-vfx.mp4"
         style="width: 100%"
         class="tw-object-cover lg:-tw-mt-72 tw-relative -tw-z-20"
       />
@@ -58,7 +58,7 @@
         >
         <ul class="tw-mt-4">
           <li>🚀 WEBDEV</li>
-          <li>🏆 VIDEO EDIITNG & VFX</li>
+          <li>🏆 VIDEO EDITING & VFX</li>
           <li>📦 3D ANIMATION</li>
           <li>🎶 MUSIC PRODUCTION</li>
         </ul>
@@ -152,13 +152,14 @@
 import { useWindowScroll } from '@vueuse/core';
 import { computed, ref } from 'vue';
 
+import glow1 from '~assets/cuteglow.png';
+import glow2 from '~assets/cuteglow1.png';
+
+const glow1Opacity = ref(0);
+const glow2Opacity = ref(0);
+
 const scroll = useWindowScroll();
 
-// const translucentNamesXOffset = computed(() => {
-//   return -880 + scroll.y.value / 2;
-// });
-
-// -440 to -880 to x offset lerp to make it look like the text is moving
 let t = 0;
 let offset = -440;
 function animateNames() {
@@ -167,16 +168,21 @@ function animateNames() {
   if (t > 1) {
     t = 0;
   }
-
   offset = -440 + t * -440;
-
   translucentNamesXOffset.value = offset - scroll.y.value / 2;
-
   requestAnimationFrame(animateNames);
 }
-requestAnimationFrame(animateNames);
+
+animateNames();
 
 const translucentNamesXOffset = ref(-440);
+
+function animateGlow() {
+  // TODO: Stuff
+  requestAnimationFrame(animateGlow);
+}
+
+animateGlow();
 
 function openYouTube() {
   window.open('https://www.youtube.com/@filmicvisuals');
