@@ -1,13 +1,10 @@
 import { ref } from 'vue';
 
-const buffer = await (await fetch('/music.flac')).arrayBuffer();
-
 const context = new AudioContext();
 
 const source = context.createBufferSource();
 const gainNode = context.createGain();
 
-source.buffer = await context.decodeAudioData(buffer);
 source.loop = true;
 
 source.connect(gainNode);
@@ -21,6 +18,16 @@ const muted = ref(false);
 
 export const useMusic = () => {
   if (!initialized) {
+    fetch('/music.flac').then((buffer) =>
+      buffer
+        .arrayBuffer()
+        .then((arrayBuffer) =>
+          context
+            .decodeAudioData(arrayBuffer)
+            .then((buffer) => (source.buffer = buffer))
+        )
+    );
+
     initialized = true;
 
     const userInteractionPromise = new Promise((resolve) => {

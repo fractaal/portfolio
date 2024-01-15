@@ -102,7 +102,7 @@
             <div
               class="tw-font-mono tw-text-2xl tw-font-semibold tracking-wide tw-italic tw-max-w-lg"
             >
-              💪 My strength lies in in the interdisciplinary knowledge I have.
+              💪 My strength lies in the interdisciplinary knowledge I have.
             </div>
           </div>
         </div>
