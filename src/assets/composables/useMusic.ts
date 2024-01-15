@@ -15,7 +15,7 @@ gainNode.connect(context.destination);
 
 let initialized = false;
 
-let controlsEnabled = false;
+const controlsEnabled = ref(false);
 
 const muted = ref(false);
 
@@ -35,34 +35,34 @@ export const useMusic = () => {
       gainNode.gain.linearRampToValueAtTime(1, context.currentTime + 3);
 
       setTimeout(() => {
-        controlsEnabled = true;
-      }, 3);
+        controlsEnabled.value = true;
+      }, 3000);
     });
   }
 
   const mute = () => {
-    if (!controlsEnabled) return;
+    if (!controlsEnabled.value) return;
 
-    controlsEnabled = false;
+    controlsEnabled.value = false;
     gainNode.gain.setValueAtTime(1, context.currentTime);
     gainNode.gain.linearRampToValueAtTime(0, context.currentTime + 1);
     muted.value = true;
 
     setTimeout(() => {
-      controlsEnabled = true;
+      controlsEnabled.value = true;
     }, 1000);
   };
 
   const unmute = () => {
-    if (!controlsEnabled) return;
+    if (!controlsEnabled.value) return;
 
-    controlsEnabled = false;
+    controlsEnabled.value = false;
     gainNode.gain.setValueAtTime(0, context.currentTime);
     gainNode.gain.linearRampToValueAtTime(1, context.currentTime + 1);
     muted.value = false;
 
     setTimeout(() => {
-      controlsEnabled = true;
+      controlsEnabled.value = true;
     }, 1000);
   };
 
@@ -71,5 +71,6 @@ export const useMusic = () => {
     unmute,
     muted,
     context,
+    controlsEnabled,
   };
 };

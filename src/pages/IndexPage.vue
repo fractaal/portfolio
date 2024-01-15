@@ -193,7 +193,13 @@ let offset = -440;
 
 const translucentNamesXOffset = ref(-440);
 
-const { mute, unmute, muted, context: audioContext } = useMusic();
+const {
+  mute,
+  unmute,
+  muted,
+  context: audioContext,
+  controlsEnabled,
+} = useMusic();
 
 function easeInOutExpo(x: number): number {
   return x === 0
@@ -239,7 +245,8 @@ function smoothHeartbeat(time: number) {
 const recentMultipliers: number[] = [];
 
 const muteAndLerpValues = async () => {
-  //
+  if (!controlsEnabled.value) return;
+
   mute();
 
   for (let i = 0; i < 50; i++) {
@@ -251,7 +258,7 @@ const muteAndLerpValues = async () => {
 };
 
 const unmuteAndLerpValues = async () => {
-  //
+  if (!controlsEnabled.value) return;
 
   unmute();
 
@@ -290,8 +297,6 @@ function animate() {
   }
 
   const finalMultiplier = sum / recentMultipliers.length + a * 2;
-
-  console.log(multiplier);
 
   glow1Opacity.value = (Math.sin(timeMs / 1000) / 2 + 0.5) * finalMultiplier;
   glow2Opacity.value =
