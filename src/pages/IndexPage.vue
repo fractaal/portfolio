@@ -1,24 +1,36 @@
 <template>
   <q-page class="">
-    <div class="tw-my-24"></div>
+    <div class="tw-my-8 tw-px-8">
+      <q-btn
+        @click="muted ? unmute() : mute()"
+        class="tw-p-4 rounded-full"
+        unelevated
+      >
+        <q-icon
+          :name="muted ? 'fa-solid fa-volume-mute' : 'fa-solid fa-volume-up'"
+        />
+      </q-btn>
+    </div>
     <img
       src="~assets/cuteglow.png"
       class="tw-w-full absolute tw-h-[1500px] -tw-top-[500px] -tw-z-30"
     />
-    <div
-      class="tw-w-screen; margin-top: -200px tw-h-[500px] tw-overflow-hidden -tw-mb-96 tw-border-y-white/10 tw-border-y"
-    >
-      <video
-        autoplay
-        loop
-        muted
-        src="~assets/smaller-vfx.mp4"
-        style="width: 100%"
-        class="tw-object-cover lg:-tw-mt-72 tw-relative -tw-z-20"
-      />
+    <div>
       <div
-        class="tw-bg-gradient-to-tr tw-from-fuchsia-600/5 tw-to-amber-200/20 tw-border-x-slate-50/25 tw-border-x tw-z-0 tw-h-[500px] tw-w-[425px] tw-absolute tw-top-0 tw-left-[100px] tw-backdrop-blur-md"
-      ></div>
+        class="tw-relative tw-w-screen tw-h-[500px] tw-overflow-hidden -tw-mb-96 tw-border-y-white/10 tw-border-y"
+      >
+        <video
+          autoplay
+          loop
+          muted
+          src="~assets/smaller-vfx.mp4"
+          style="width: 100%"
+          class="tw-object-cover lg:-tw-mt-72"
+        />
+        <div
+          class="tw-bg-gradient-to-tr tw-from-fuchsia-600/5 tw-to-amber-200/20 tw-border-x-slate-50/25 tw-border-x tw-z-0 tw-h-[500px] tw-w-[425px] tw-absolute tw-top-0 tw-left-[100px] tw-backdrop-blur-md"
+        ></div>
+      </div>
     </div>
     <div
       class="tw-font-medium tw-ml-32 tw-text-xl -tw-mb-4 tw-relative tw-z-5"
@@ -29,7 +41,7 @@
     <div class="tw-mx-32 tw-z-5 tw-relative">
       <div
         class="tw-font-black tw-text-8xl tw-tracking-tight tw-opacity-20 tw-w-[100vw] absolute tw-whitespace-nowrap"
-        :style="{ left: translucentNamesXOffset + 'px' }"
+        :style="{ transform: 'translateX(' + translucentNamesXOffset + 'px)' }"
       >
         Ben Jude Ben Jude Ben Jude Ben Jude Ben Jude Ben Jude Ben Jude Ben Jude
       </div>
@@ -144,6 +156,7 @@
           </div>
         </div>
       </div>
+      <div class="tw-h-32"></div>
     </div>
   </q-page>
 </template>
@@ -155,27 +168,98 @@ import { computed, ref } from 'vue';
 import glow1 from '~assets/cuteglow.png';
 import glow2 from '~assets/cuteglow1.png';
 
+const debugInfo = ref('');
+
+const audioSource = ref<AudioBufferSourceNode | null>(null);
+
+let _gain: GainNode | null = null;
+
+fetch('/music.flac')
+  .then((response) => response.arrayBuffer())
+  .then((arrayBuffer) => {
+    let p = new Promise((resolve) => {
+      document.addEventListener('click', resolve);
+    });
+
+    p.then(() => {
+      audioContext.decodeAudioData(arrayBuffer, (buffer) => {
+        const source = audioContext.createBufferSource();
+        audioSource.value = source;
+        source.buffer = buffer;
+        source.loop = true;
+        source.start(0);
+
+        const gain = audioContext.createGain();
+        _gain = gain;
+
+        source.connect(gain);
+        gain.connect(audioContext.destination);
+
+        // Set the initial gain to 0
+        gain.gain.setValueAtTime(0, audioContext.currentTime);
+
+        // Fade in over 3 seconds, for example
+        gain.gain.linearRampToValueAtTime(1, audioContext.currentTime + 3);
+      });
+    });
+  });
+
 const glow1Opacity = ref(0);
 const glow2Opacity = ref(0);
 
+const audioContext = new AudioContext();
+
+const muted = ref(false);
+
+function mute() {
+  if (_gain) {
+    muted.value = true;
+    _gain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.5);
+  }
+}
+
+function unmute() {
+  if (_gain) {
+    muted.value = false;
+    _gain.gain.linearRampToValueAtTime(1, audioContext.currentTime + 0.5);
+  }
+}
 const scroll = useWindowScroll();
 
-let t = 0;
 let offset = -440;
-function animateNames() {
-  t = t + 0.001;
 
-  if (t > 1) {
-    t = 0;
-  }
+const translucentNamesXOffset = ref(-440);
+
+function easeInOutExpo(x: number): number {
+  return x === 0
+    ? 0
+    : x === 1
+    ? 1
+    : x < 0.5
+    ? Math.pow(2, 20 * x - 10) / 2
+    : (2 - Math.pow(2, -20 * x + 10)) / 2;
+}
+
+function animateNames() {
+  // t = t + 0.001;
+
+  // if (t > 1) {
+  //   t = 0;
+  // }
+
+  let t = (audioContext.currentTime % ((60 / 86) * 4)) / 3;
+
+  // Cubic ease in-out
+  t = easeInOutExpo(t);
+
   offset = -440 + t * -440;
+
   translucentNamesXOffset.value = offset - scroll.y.value / 2;
+
   requestAnimationFrame(animateNames);
 }
 
 animateNames();
-
-const translucentNamesXOffset = ref(-440);
 
 function animateGlow() {
   // TODO: Stuff
