@@ -2,7 +2,7 @@
   <q-page class="">
     <div class="tw-my-8 tw-px-8">
       <q-btn
-        @click="muted ? unmute() : mute()"
+        @click="muted ? unmuteAndLerpValues() : muteAndLerpValues()"
         class="tw-p-4 rounded-full"
         unelevated
       >
@@ -13,6 +13,22 @@
     </div>
     <img
       src="~assets/cuteglow.png"
+      :style="{ opacity: glow1Opacity }"
+      class="tw-w-full absolute tw-h-[1500px] -tw-top-[500px] -tw-z-30"
+    />
+    <img
+      src="~assets/cuteglow-1.png"
+      :style="{ opacity: glow2Opacity }"
+      class="tw-w-full absolute tw-h-[1500px] -tw-top-[500px] -tw-z-30"
+    />
+    <img
+      src="~assets/cuteglow-2.png"
+      :style="{ opacity: glow3Opacity }"
+      class="tw-w-full absolute tw-h-[1500px] -tw-top-[500px] -tw-z-30"
+    />
+    <img
+      src="~assets/cuteglow-3.png"
+      :style="{ opacity: glow2Opacity }"
       class="tw-w-full absolute tw-h-[1500px] -tw-top-[500px] -tw-z-30"
     />
     <div>
@@ -163,72 +179,21 @@
 
 <script setup lang="ts">
 import { useWindowScroll } from '@vueuse/core';
+import { useMusic } from 'src/assets/composables/useMusic';
 import { computed, ref } from 'vue';
 
-import glow1 from '~assets/cuteglow.png';
-import glow2 from '~assets/cuteglow1.png';
+const glow1Opacity = ref(1);
+const glow2Opacity = ref(1);
+const glow3Opacity = ref(1);
+const glow4Opacity = ref(1);
 
-const debugInfo = ref('');
-
-const audioSource = ref<AudioBufferSourceNode | null>(null);
-
-let _gain: GainNode | null = null;
-
-fetch('/music.flac')
-  .then((response) => response.arrayBuffer())
-  .then((arrayBuffer) => {
-    let p = new Promise((resolve) => {
-      document.addEventListener('click', resolve);
-    });
-
-    p.then(() => {
-      audioContext.decodeAudioData(arrayBuffer, (buffer) => {
-        const source = audioContext.createBufferSource();
-        audioSource.value = source;
-        source.buffer = buffer;
-        source.loop = true;
-        source.start(0);
-
-        const gain = audioContext.createGain();
-        _gain = gain;
-
-        source.connect(gain);
-        gain.connect(audioContext.destination);
-
-        // Set the initial gain to 0
-        gain.gain.setValueAtTime(0, audioContext.currentTime);
-
-        // Fade in over 3 seconds, for example
-        gain.gain.linearRampToValueAtTime(1, audioContext.currentTime + 3);
-      });
-    });
-  });
-
-const glow1Opacity = ref(0);
-const glow2Opacity = ref(0);
-
-const audioContext = new AudioContext();
-
-const muted = ref(false);
-
-function mute() {
-  if (_gain) {
-    muted.value = true;
-    _gain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.5);
-  }
-}
-
-function unmute() {
-  if (_gain) {
-    muted.value = false;
-    _gain.gain.linearRampToValueAtTime(1, audioContext.currentTime + 0.5);
-  }
-}
 const scroll = useWindowScroll();
 
 let offset = -440;
 
 const translucentNamesXOffset = ref(-440);
+
+const { mute, unmute, muted, context: audioContext } = useMusic();
 
 function easeInOutExpo(x: number): number {
   return x === 0
@@ -240,26 +205,106 @@ function easeInOutExpo(x: number): number {
     : (2 - Math.pow(2, -20 * x + 10)) / 2;
 }
 
-function animateNames() {
-  // t = t + 0.001;
+const decayRate = 10;
+const beatPeriod = 60 / 87;
 
-  // if (t > 1) {
-  //   t = 0;
-  // }
+let multiplier = 1;
 
-  let t = (audioContext.currentTime % ((60 / 86) * 4)) / 3;
+function smoothHeartbeat(time: number) {
+  let _time = time % beatPeriod;
 
-  // Cubic ease in-out
+  let samplePoints = 64;
+  let sampleRange = 0.75;
+
+  let startingSamplePoint = (_time - sampleRange / 2) % beatPeriod;
+
+  let stepSize = sampleRange / samplePoints;
+
+  const samples = [];
+
+  for (let i = 0; i < samplePoints; i++) {
+    let sampleTime = startingSamplePoint + i * stepSize;
+    samples.push(Math.exp(-decayRate * sampleTime));
+  }
+
+  let sum = 0;
+
+  for (let i = 0; i < samples.length; i++) {
+    sum += samples[i];
+  }
+
+  return sum / samples.length;
+}
+
+const recentMultipliers: number[] = [];
+
+const muteAndLerpValues = async () => {
+  //
+  mute();
+
+  for (let i = 0; i < 50; i++) {
+    a = i / 50;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+
+  a = 1;
+};
+
+const unmuteAndLerpValues = async () => {
+  //
+
+  unmute();
+
+  for (let i = 0; i < 50; i++) {
+    a = 1 - i / 50;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+
+  a = 0;
+};
+
+let a = 0;
+
+function animate() {
+  let t = (audioContext.currentTime % ((60 / 87) * 4)) / 3;
+  let fallbackT = (performance.now() % 4000) / 4000;
+
   t = easeInOutExpo(t);
 
-  offset = -440 + t * -440;
+  const finalT = t + (fallbackT - t) * easeInOutExpo(a);
+
+  offset = -440 + finalT * -440;
 
   translucentNamesXOffset.value = offset - scroll.y.value / 2;
 
-  requestAnimationFrame(animateNames);
+  const timeMs = performance.now();
+
+  multiplier = 0.5 + smoothHeartbeat(audioContext.currentTime) * 0.5;
+
+  recentMultipliers.unshift(multiplier);
+  recentMultipliers.length = 15;
+
+  let sum = 0;
+  for (let i = 0; i < recentMultipliers.length; i++) {
+    sum += recentMultipliers[i];
+  }
+
+  const finalMultiplier = sum / recentMultipliers.length + a * 2;
+
+  console.log(multiplier);
+
+  glow1Opacity.value = (Math.sin(timeMs / 1000) / 2 + 0.5) * finalMultiplier;
+  glow2Opacity.value =
+    (Math.sin(timeMs / 1000 + Math.PI / 2) / 2 + 0.5) * finalMultiplier;
+  glow3Opacity.value =
+    (Math.sin(timeMs / 1000 + Math.PI) / 2 + 0.5) * finalMultiplier;
+  glow4Opacity.value =
+    (Math.sin(timeMs / 1000 + (3 * Math.PI) / 2) / 2 + 0.5) * finalMultiplier;
+
+  requestAnimationFrame(animate);
 }
 
-animateNames();
+animate();
 
 function animateGlow() {
   // TODO: Stuff
