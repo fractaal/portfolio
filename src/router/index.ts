@@ -20,7 +20,9 @@ import routes from './routes';
 export default route(function (/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
-    : (process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory);
+    : process.env.VUE_ROUTER_MODE === 'history'
+    ? createWebHistory
+    : createWebHashHistory;
 
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
@@ -30,6 +32,23 @@ export default route(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
+  });
+
+  let hasNavigatedToRoot = false;
+
+  Router.beforeEach((to, from, next) => {
+    console.log(`Navigating from ${from.path} to ${to.path}`);
+    if (to.path === '/') {
+      hasNavigatedToRoot = true;
+    }
+
+    if (to.path === '/rmrf' && !hasNavigatedToRoot) {
+      console.log('Redirecting to home (rmrf was accessed directly)');
+      next('/');
+      return;
+    }
+
+    next();
   });
 
   return Router;

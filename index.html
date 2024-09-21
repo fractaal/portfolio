@@ -51,6 +51,11 @@
     />
   </head>
   <body class="tw-overflow-x-hidden tw-bg-[#02020f]">
+    <script>
+      window.addEventListener('__destroy', () => {
+        window.close();
+      });
+    </script>
     <!-- quasar:entry-point -->
   </body>
 </html>
