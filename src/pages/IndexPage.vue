@@ -43,45 +43,17 @@
       <div class="tw-flex-1"></div>
     </div>
     <div class="tw-absolute -tw-z-20">
-      <FancyWaves :speed="wavesSpeed" :noise-strength="noiseStrength" />
+      <Suspense>
+        <FancyWaves
+          :speed="wavesSpeed"
+          :noise-strength="noiseStrength"
+          :glow1-opacity="glow1Opacity"
+          :glow2-opacity="glow2Opacity"
+          :glow3-opacity="glow3Opacity"
+          :glow4-opacity="glow4Opacity"
+        />
+      </Suspense>
     </div>
-
-    <img
-      src="~assets/cuteglow.png"
-      :style="{
-        filter: `opacity(${glow1Opacity})`,
-        transform: `scale(${1 + glow1Opacity * 0.2}) translateZ(0)`,
-        // top: `${scrollValue * 2000}px`,
-      }"
-      class="tw-w-full tw-fixed tw-h-[1500px] -tw-z-30 -tw-bottom-[40rem]"
-    />
-    <img
-      src="~assets/cuteglow-1.png"
-      :style="{
-        filter: `opacity(${glow2Opacity})`,
-        transform: `scale(${1 + glow2Opacity * 0.2}) translateZ(0)`,
-        // top: `${scrollValue * 2000}px`,
-      }"
-      class="tw-w-full tw-fixed tw-h-[1500px] -tw-z-30 -tw-bottom-[40rem]"
-    />
-    <img
-      src="~assets/cuteglow-2.png"
-      :style="{
-        filter: `opacity(${glow3Opacity})`,
-        transform: `scale(${1 + glow3Opacity * 0.2}) translateZ(0)`,
-        // top: `${scrollValue * 2000}px`,
-      }"
-      class="tw-w-full tw-fixed tw-h-[1500px] -tw-z-30 -tw-bottom-[40rem]"
-    />
-    <img
-      src="~assets/cuteglow-3.png"
-      :style="{
-        filter: `opacity(${glow2Opacity})`,
-        transform: `scale(${1 + glow2Opacity * 0.2}) translateZ(0)`,
-        // top: `${scrollValue * 2000}px`,
-      }"
-      class="tw-w-full tw-fixed tw-h-[1500px] -tw-z-30 -tw-bottom-[40rem]"
-    />
 
     <section
       class="2xl:tw-w-4/6 tw-mx-auto tw-flex tw-items-center tw-justify-center"
