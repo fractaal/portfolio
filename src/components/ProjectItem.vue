@@ -73,13 +73,13 @@
       <transition-group name="fade">
         <div
           v-if="activeImageURL.includes('.mp4')"
-          class="tw-bg-purple-700 tw-w-full tw-h-full tw-object-cover tw-absolute tw-top-0 tw-left-0 tw-bottom-0 tw-right-0 -tw-z-10"
+          class="tw-bg-black tw-w-full tw-h-full tw-object-cover tw-absolute tw-top-0 tw-left-0 tw-bottom-0 tw-right-0 -tw-z-10"
         ></div>
         <img
           v-else
           :src="activeImageURL"
           :key="activeImageURL"
-          class="tw-object-cover tw-blur-lg tw-opacity-50 tw-absolute tw-h-full tw-w-full tw-top-0 tw-left-0 tw-bottom-0 tw-right-0 -tw-z-10"
+          class="tw-object-cover tw-blur-lg tw-absolute tw-h-full tw-w-full tw-top-0 tw-left-0 tw-bottom-0 tw-right-0 -tw-z-10"
         />
       </transition-group>
 
@@ -126,7 +126,7 @@
           <div class="tw-flex-1">
             <span
               v-if="project"
-              class="tw-text-lg"
+              class="tw-text-base"
               v-html="project?.description"
             ></span>
           </div>
@@ -181,12 +181,12 @@
         <div
           class="tw-absolute tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-rounded-xl tw-overflow-hidden tw-opacity-50 tw-pointer-events-none"
         >
-          <img
+          <!-- <img
             src="/frosted_glass_noise.png"
             style="width: 100%; height: 100%"
             class="tw-object-cover"
             alt=""
-          />
+          /> -->
         </div>
       </div>
     </transition>
@@ -365,6 +365,8 @@ onMounted(async () => {
   );
 
   lowestAspectRatio.value = Math.min(...ratios);
+  // lowestAspectRatio.value =
+  //   lowestAspectRatio.value + lowestAspectRatio.value * (1 / 6);
 
   await new Promise((resolve) =>
     setTimeout(resolve, Math.round(Math.random() * 5) * 1000)
