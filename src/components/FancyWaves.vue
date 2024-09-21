@@ -9,6 +9,13 @@
 
     <TresPerspectiveCamera :position="position" :rotation="[1.3, 0, 0]" />
     <!-- <TresPerspectiveCamera /> -->
+    <primitive ref="glowMesh" :object="_glowMesh">
+      <TresShaderMaterial
+        :vertex-shader="glowMeshVertexShader"
+        :fragment-shader="glowMeshFragmentShader"
+        :uniforms="glowMeshUniforms"
+      />
+    </primitive>
 
     <primitive ref="mesh" :object="_mesh">
       <TresShaderMaterial
@@ -21,14 +28,115 @@
 </template>
 
 <script setup lang="ts">
-import { ref, shallowRef, computed } from 'vue';
-import { TresCanvas, TresPrimitive, useRenderLoop } from '@tresjs/core';
+import { ref, shallowRef, computed, watch } from 'vue';
+import {
+  TresCanvas,
+  TresPrimitive,
+  useRenderLoop,
+  useTexture,
+} from '@tresjs/core';
 import { OrbitControls } from '@tresjs/cientos';
 import ManualFPS from './ManualFPS.vue';
 
 import { Mesh, PlaneGeometry } from 'three';
 
 const { onLoop } = useRenderLoop();
+
+// ###### lights
+
+const glowGeometry = new PlaneGeometry(500, 75, 1, 1);
+const _glowMesh = new Mesh(glowGeometry);
+
+const glowMeshUniforms = {
+  glow1: { type: 't', value: await useTexture(['/cuteglow.png']) },
+  glow2: { type: 't', value: await useTexture(['/cuteglow-1.png']) },
+  glow3: { type: 't', value: await useTexture(['/cuteglow-2.png']) },
+  glow4: { type: 't', value: await useTexture(['/cuteglow-3.png']) },
+
+  glow1Opacity: { value: 0.5 },
+  glow2Opacity: { value: 0.5 },
+  glow3Opacity: { value: 0.5 },
+  glow4Opacity: { value: 0.5 },
+};
+
+const glowMeshVertexShader = `
+varying vec2 vUv;
+
+void main() {
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const glowMeshFragmentShader = `
+varying vec2 vUv;
+uniform sampler2D glow1;
+uniform sampler2D glow2;
+uniform sampler2D glow3;
+uniform sampler2D glow4;
+
+uniform float glow1Opacity;
+uniform float glow2Opacity;
+uniform float glow3Opacity;
+uniform float glow4Opacity;
+
+void main() {
+  vec4 color = vec4(0.0);  // Start with an empty color (transparent black)
+
+  float totalOpacity = 1.0; // glow1Opacity + glow2Opacity + glow3Opacity + glow4Opacity;
+
+  // Normalize the opacities so they sum up to 1
+  float glow1OpacityNormalized = glow1Opacity / totalOpacity;
+  float glow2OpacityNormalized = glow2Opacity / totalOpacity;
+  float glow3OpacityNormalized = glow3Opacity / totalOpacity;
+  float glow4OpacityNormalized = glow4Opacity / totalOpacity;
+
+  // Get the glow colors and multiply their alpha channels by the normalized opacities
+  vec4 glow1Color = texture2D(glow1, vUv);
+  glow1Color.a *= glow1OpacityNormalized;
+
+  vec4 glow2Color = texture2D(glow2, vUv);
+  glow2Color.a *= glow2OpacityNormalized;
+
+  vec4 glow3Color = texture2D(glow3, vUv);
+  glow3Color.a *= glow3OpacityNormalized;
+
+  vec4 glow4Color = texture2D(glow4, vUv);
+  glow4Color.a *= glow4OpacityNormalized;
+
+  // Blend the colors in order, using alpha blending
+  // Color blending equation: C_final = C1 * A1 + C2 * A2 * (1 - A1)
+  // This repeats for each additional color
+  color = glow1Color; // Start with the first glow
+
+  // Blend glow2 over glow1
+  color.rgb = mix(color.rgb, glow2Color.rgb, glow2Color.a);
+  color.a += glow2Color.a * (1.0 - color.a);  // Accumulate the alpha properly
+
+  // Blend glow3 over the result
+  color.rgb = mix(color.rgb, glow3Color.rgb, glow3Color.a);
+  color.a += glow3Color.a * (1.0 - color.a);
+
+  // Blend glow4 over the result
+  color.rgb = mix(color.rgb, glow4Color.rgb, glow4Color.a);
+  color.a += glow4Color.a * (1.0 - color.a);
+
+  // Output the final blended color
+  gl_FragColor = color;
+}
+`;
+
+const glowMesh = shallowRef<TresPrimitive | null>(null);
+
+watch(glowMesh, (value) => {
+  if (!value) return;
+
+  value.rotation.x = 3.14 / 2;
+  value.position.y = 50;
+  value.position.z = -35;
+});
+
+// ### ###
 
 const geometry = new PlaneGeometry(30, 20, 250, 250);
 // const mat = new MeshBasicMaterial({ color: 0x444444, wireframe: true });
@@ -49,6 +157,11 @@ updateScroll();
 const props = defineProps({
   speed: { type: Number, default: 1 },
   noiseStrength: { type: Number, default: 1 },
+
+  glow1Opacity: { type: Number, default: 0.5 },
+  glow2Opacity: { type: Number, default: 0.5 },
+  glow3Opacity: { type: Number, default: 0.5 },
+  glow4Opacity: { type: Number, default: 0.5 },
 });
 
 onLoop(({ elapsed }) => {
@@ -65,7 +178,12 @@ onLoop(({ elapsed }) => {
   mesh.value.material.uniforms.time.value += 0.005 * props.speed;
   mesh.value.material.uniforms.noiseStrength.value = props.noiseStrength;
 
-  // console.log(mesh.value.material.uniforms.time.value);
+  if (!glowMesh.value) return;
+
+  glowMesh.value.material.uniforms.glow1Opacity.value = props.glow1Opacity;
+  glowMesh.value.material.uniforms.glow2Opacity.value = props.glow2Opacity;
+  glowMesh.value.material.uniforms.glow3Opacity.value = props.glow3Opacity;
+  glowMesh.value.material.uniforms.glow4Opacity.value = props.glow4Opacity;
 });
 
 const uniforms = shallowRef({
