@@ -81,6 +81,10 @@ export class PlaybackPositionNode {
     this._splitter.connect(this._analyser, audioBuffer.numberOfChannels);
   }
 
+  get buffer() {
+    return this._bufferSource.buffer;
+  }
+
   // forward component node properties
 
   get loop() {
