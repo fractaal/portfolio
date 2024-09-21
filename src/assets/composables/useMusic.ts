@@ -137,35 +137,44 @@ const music = [
   //     false,
   //   ],
   // },
-  // {
-  //   file: '/sneaky.flac',
-  //   bpm: 93,
-  //   title: 'Sneaky',
-  //   beatMap: [false, false, false, false].flatMap(() => [
-  //     true,
-  //     false, //  2
-  //     false,
-  //     false, // 4
-  //     false,
-  //     true, // 6
-  //     false,
-  //     false,
-  //   ]),
-  // },
+  {
+    file: '/music-house.flac',
+    bpm: 105,
+    title: '',
+    beatMap: [false, false, false, false].flatMap(() => [
+      true,
+      false, //  2
+      false,
+      false, // 4
+      true,
+      false, // 6
+      false,
+      false,
+    ]),
+  },
 ];
 
 const choiceIndex = Math.floor(Math.random() * music.length);
 
-const buffer = await context.decodeAudioData(
-  await (await fetch(music[choiceIndex].file)).arrayBuffer()
-);
+fetch(music[choiceIndex].file).then((response) => {
+  response.arrayBuffer().then((buffer) => {
+    context.decodeAudioData(buffer).then((buffer) => {
+      source.buffer = buffer;
 
-const crashBuffer = await context.decodeAudioData(
-  await (await fetch('/music-rmrf-bite.flac')).arrayBuffer()
-);
+      console.log('Loaded source buffer - ', source.buffer);
+    });
+  });
+});
 
-crashSource.buffer = crashBuffer;
-source.buffer = buffer;
+fetch('/music-rmrf-bite.flac').then((response) => {
+  response.arrayBuffer().then((buffer) => {
+    context.decodeAudioData(buffer).then((buffer) => {
+      crashSource.buffer = buffer;
+
+      console.log('Loaded crash buffer - ', crashSource.buffer);
+    });
+  });
+});
 
 let initialized = false;
 
@@ -177,6 +186,12 @@ export const useMusic = () => {
 
     (async () => {
       while (true) {
+        if (source.buffer == null || crashSource.buffer == null) {
+          console.log('Waiting for buffers to load, retrying in 50ms...');
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          continue;
+        }
+
         if (context.state !== 'running') {
           context.resume();
           console.log('AudioContext not running, retrying in 50ms...');
