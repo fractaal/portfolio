@@ -18,7 +18,6 @@ export default [
       { name: 'Godot Engine', icon: 'fas fa-cube' },
       { name: 'OpenAI API', icon: 'fas fa-cloud' },
       { name: 'OpenRouter', icon: 'fas fa-network-wired' },
-      { name: 'Python', icon: 'fas fa-python' },
       { name: 'Natural Language Processing', icon: 'fas fa-language' },
     ],
     images: [
