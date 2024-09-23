@@ -56,7 +56,7 @@
     </div>
 
     <section
-      class="2xl:tw-w-4/6 tw-mx-auto tw-flex tw-items-center tw-justify-center"
+      class="lg:tw-w-4/6 tw-mx-auto tw-flex tw-items-center tw-justify-center"
       v-if="hideEverything"
     >
       <div class="tw-font-mono tw-text-2xl fade-after-show-delayed">
@@ -65,12 +65,12 @@
     </section>
 
     <section
-      class="2xl:tw-w-4/6 tw-mx-auto"
+      class="lg:tw-w-4/6 tw-mx-auto"
       :class="hideEverything ? 'faint-after-show' : 'restore-after-show'"
     >
       <div class="tw-flex tw-flex-col xl:tw-grid tw-grid-cols-12">
         <div
-          class="tw-flex-1 tw-col-span-7 tw-shrink-0 -tw-mt-8 tw-relative tw-h-[500px] tw-overflow-hidden 2xl:tw-rounded-3xl tw-w-full tw-mx-auto tw-shadow-2xl tw-shadow-black"
+          class="tw-flex-1 tw-col-span-7 tw-shrink-0 -tw-mt-8 tw-relative tw-h-[500px] tw-overflow-hidden lg:tw-rounded-3xl tw-w-full tw-mx-auto tw-shadow-2xl tw-shadow-black"
         >
           <div class="tw-absolute tw-top-0 tw-left-0 tw-p-4 tw-flex tw-gap-2">
             <div
@@ -205,13 +205,13 @@
     </section>
 
     <section
-      class="2xl:tw-w-4/6 tw-mx-auto"
+      class="lg:tw-w-4/6 tw-mx-auto"
       :class="hideEverything ? 'faint-after-show' : 'restore-after-show'"
     >
       <div class="tw-h-96 tw-mx-2 md:tw-mx-auto">
         <div class="tw-flex tw-items-center tw-gap-4"></div>
         <div
-          class="tw-relative tw-font-mono tw-mx-auto tw-mt-8 tw-font-semibold tw-text-4xl tw-w-full"
+          class="lg:tw-ml-0 tw-ml-4 tw-relative tw-font-mono tw-mx-auto tw-mt-8 tw-font-semibold tw-text-4xl tw-w-full"
         >
           > PROJECTS
 
@@ -289,18 +289,23 @@
             class="tw-bg-gradient-to-l tw-from-transparent tw-via-fuchsia-500 tw-to-white tw-h-[1.5px] tw-rounded-full tw-w-24"
           ></div>
         </div>
-        <div class="tw-flex tw-gap-8 tw-mt-4 tw-mx-auto tw-w-fit">
+        <div
+          class="tw-flex tw-flex-col xs:tw-flex-row lg:tw-gap-8 tw-gap-4 tw-mt-4 tw-mx-auto tw-w-fit"
+        >
           <div
             @click="openYouTube"
             class="tw-bg-gradient-to-tr tw-from-amber-600/25 tw-via-red-500 tw-to-fuchsia-500 tw-p-[1.5px] tw-rounded-3xl tw-shadow-fuchsia-700/25 hover:tw-shadow-fuchsia-700/75 tw-shadow-2xl tw-w-fit hover:tw-scale-110 hover:tw-cursor-pointer tw-transition-all tw-duration-300"
           >
             <div
-              class="tw-h-40 tw-rounded-3xl tw-bg-[#02020f] tw-w-40 tw-p-4 tw-flex tw-flex-col tw-items-center tw-justify-center hover:tw-bg-transparent tw-duration-300"
+              class="lg:tw-h-40 lg:tw-w-40 tw-h-28 tw-w-28 tw-rounded-3xl tw-bg-[#02020f] tw-p-4 tw-flex tw-flex-col tw-items-center tw-justify-center hover:tw-bg-transparent tw-duration-300"
             >
-              <q-icon name="fa-brands fa-youtube" class="tw-text-6xl" />
-              <div class="tw-text-xl tw-font-semibold">Filmic</div>
-              <div class="tw-text-xs tw-tracking-tighter">
-                YouTube Channel | VFX
+              <q-icon
+                name="fa-brands fa-youtube"
+                class="lg:tw-text-6xl tw-text-2xl"
+              />
+              <div class="lg:tw-text-xl tw-font-semibold">Filmic</div>
+              <div class="tw-text-xs tw-tracking-tighter tw-text-center">
+                YouTube | VFX
               </div>
             </div>
           </div>
@@ -310,11 +315,16 @@
             class="tw-bg-gradient-to-tr tw-to-teal-600/25 tw-via-emerald-500 tw-from-teal-500 tw-p-[1.5px] tw-rounded-3xl tw-shadow-teal-500/25 hover:tw-shadow-teal-700/75 tw-shadow-2xl tw-w-fit hover:tw-scale-110 hover:tw-cursor-pointer tw-transition-all tw-duration-300"
           >
             <div
-              class="tw-h-40 tw-rounded-3xl tw-bg-[#02020f] tw-w-40 tw-p-4 tw-flex tw-flex-col tw-items-center tw-justify-center hover:tw-bg-transparent tw-duration-300"
+              class="lg:tw-h-40 lg:tw-w-40 tw-h-28 tw-w-28 tw-rounded-3xl tw-bg-[#02020f] tw-p-4 tw-flex tw-flex-col tw-items-center tw-justify-center hover:tw-bg-transparent tw-duration-300"
             >
-              <q-icon name="fa-brands fa-github" class="tw-text-6xl" />
-              <div class="tw-text-xl tw-font-semibold">Fractal</div>
-              <div class="tw-text-xs tw-tracking-tighter">GitHub | Webdev</div>
+              <q-icon
+                name="fa-brands fa-github"
+                class="lg:tw-text-6xl tw-text-2xl"
+              />
+              <div class="lg:tw-text-xl tw-font-semibold">Fractal</div>
+              <div class="tw-text-xs tw-tracking-tighter tw-text-center">
+                GitHub | Dev
+              </div>
             </div>
           </div>
 
@@ -323,11 +333,14 @@
             class="tw-bg-gradient-to-tl tw-from-fuchsia-600/25 tw-via-red-500 tw-to-amber-500 tw-p-[1.5px] tw-rounded-3xl tw-shadow-fuchsia-700/25 hover:tw-shadow-fuchsia-700/75 tw-shadow-2xl tw-w-fit hover:tw-scale-110 hover:tw-cursor-pointer tw-transition-all tw-duration-300"
           >
             <div
-              class="tw-h-40 tw-rounded-3xl tw-bg-[#02020f] tw-w-40 tw-p-4 tw-flex tw-flex-col tw-items-center tw-justify-center hover:tw-bg-transparent tw-duration-300"
+              class="lg:tw-h-40 lg:tw-w-40 tw-h-28 tw-w-28 tw-rounded-3xl tw-bg-[#02020f] tw-p-4 tw-flex tw-flex-col tw-items-center tw-justify-center hover:tw-bg-transparent tw-duration-300"
             >
-              <q-icon name="fa-brands fa-soundcloud" class="tw-text-6xl" />
-              <div class="tw-text-xl tw-font-semibold">Seventh</div>
-              <div class="tw-text-xs tw-tracking-tighter">
+              <q-icon
+                name="fa-brands fa-soundcloud"
+                class="lg:tw-text-6xl tw-text-2xl"
+              />
+              <div class="lg:tw-text-xl tw-font-semibold">Seventh</div>
+              <div class="tw-text-xs tw-tracking-tighter tw-text-center">
                 SoundCloud | Music
               </div>
             </div>
@@ -374,7 +387,6 @@ onMounted(() => {
   const scroll = useScroll(termScroll);
 
   const o = new MutationObserver(() => {
-    console.log('scrolling');
     if (termBusy.value) {
       scroll.y.value = 999;
     }
