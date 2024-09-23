@@ -292,8 +292,12 @@ export const useMusic = () => {
   };
 
   const crash = () => {
-    source.stop();
-    crashSource.start();
+    try {
+      source.stop();
+    } catch (e) {}
+    try {
+      crashSource.start();
+    } catch (e) {}
   };
 
   return {
