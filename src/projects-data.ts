@@ -29,62 +29,7 @@ export default [
       '/curator/curator.mp4',
     ],
   },
-  {
-    images: [
-      // '/tracvac/home.png',
-      '/tracvac/insight.png',
-      // '/tracvac/notifs.png',
-    ],
-    name: 'Tracvac - Vaccine Tracking Application',
-    description:
-      'Developed during the pandemic, Tracvac tracked vaccines, user occupation, and post-vaccine health reports.<br><br>LGUs received consolidated health data with graphs and analytics to monitor public health. The app also enabled LGUs to send push notifications for schedules, alerts, and updates. It featured a plugin system allowing LGUs to extend functionality, such as adding custom user fields.<br><br>Built using Vue, Quasar for the frontend, Node.js, Express, and PostgreSQL for the backend.',
-    main_discipline: {
-      name: 'Health Technology',
-      icon: 'fas fa-heartbeat',
-    },
-    disciplines: [
-      { name: 'Health Technology', icon: 'fas fa-heartbeat' },
-      { name: 'Data Analytics', icon: 'fas fa-chart-bar' },
-      { name: 'Mobile Notifications', icon: 'fas fa-bell' },
-      { name: 'Backend Development', icon: 'fas fa-server' },
-      { name: 'Frontend Development', icon: 'fas fa-code' },
-      { name: 'Plugin Architecture', icon: 'fas fa-plug' },
-    ],
-    technologies: [
-      { name: 'Vue.js', icon: 'fab fa-vuejs' },
-      { name: 'Quasar', icon: 'fab fa-vuejs' },
-      { name: 'Node.js', icon: 'fab fa-node-js' },
-      { name: 'Express.js', icon: 'fas fa-server' },
-      { name: 'PostgreSQL', icon: 'fas fa-database' },
-      { name: 'Push Notifications', icon: 'fas fa-bell' },
-    ],
-  },
-  {
-    name: 'Bilibenta - E-commerce Platform',
-    description:
-      'A mock e-commerce platform designed for farmers to deliver products directly to buyers. Focused on UI/UX design with a seamless experience for browsing and purchasing items such as rice, wheat, and meat.<br><br>Implemented using Quasar (Vue), Vue, Tailwind, and TanStack Query.',
-    main_discipline: {
-      name: 'UI/UX Design',
-      icon: 'fas fa-paint-brush',
-    },
-    disciplines: [
-      { name: 'UI/UX Design', icon: 'fas fa-paint-brush' },
-      { name: 'Frontend Development', icon: 'fas fa-code' },
-      { name: 'E-commerce', icon: 'fas fa-shopping-cart' },
-    ],
-    technologies: [
-      { name: 'Quasar', icon: 'fab fa-vuejs' },
-      { name: 'Vue.js', icon: 'fab fa-vuejs' },
-      { name: 'Tailwind CSS', icon: 'fab fa-css3-alt' },
-      { name: 'TanStack Query', icon: 'fas fa-database' },
-    ],
-    images: [
-      '/bilibenta/1.png',
-      // '/bilibenta/2.png',
-      '/bilibenta/Bilibenta.mp4',
-    ],
-  },
-  //
+
   {
     name: 'Doctor Who - 2023 Title Sequence Recreation',
     description:
@@ -116,6 +61,7 @@ export default [
     ],
   },
   //
+  //
 
   //
 
@@ -123,9 +69,10 @@ export default [
     name: 'Star Trek: Enterprise Warp Out Recreation',
     description:
       "Recreated the iconic 'Enterprise Warp Out' scene from the JJ Abrams Star Trek films.<br><br>Blender’s Eevee engine was used for 3D rendering, while Adobe After Effects was utilized for compositing and further tweaking the visual effects. Premiere Pro handled the final edit and color grading.",
+
     main_discipline: {
-      name: 'Visual Effects',
-      icon: 'fas fa-film',
+      name: 'Visual Effects and Compositing',
+      icon: 'fas fa-paint-brush',
     },
     disciplines: [
       { name: 'Visual Effects', icon: 'fas fa-film' },
@@ -146,6 +93,37 @@ export default [
       '/enterprise/5.png',
       '/enterprise/6.png',
       '/enterprise/enterprise.mp4',
+    ],
+  },
+
+  {
+    images: [
+      // '/tracvac/home.png',
+      '/tracvac/insight.png',
+      // '/tracvac/notifs.png',
+    ],
+    name: 'Tracvac - Vaccine Tracking Application',
+    description:
+      'Developed during the pandemic, Tracvac tracked vaccines, user occupation, and post-vaccine health reports.<br><br>LGUs received consolidated health data with graphs and analytics to monitor public health. The app also enabled LGUs to send push notifications for schedules, alerts, and updates. It featured a plugin system allowing LGUs to extend functionality, such as adding custom user fields.<br><br>Built using Vue, Quasar for the frontend, Node.js, Express, and PostgreSQL for the backend.',
+    main_discipline: {
+      name: 'Health Technology',
+      icon: 'fas fa-heartbeat',
+    },
+    disciplines: [
+      { name: 'Health Technology', icon: 'fas fa-heartbeat' },
+      { name: 'Data Analytics', icon: 'fas fa-chart-bar' },
+      { name: 'Mobile Notifications', icon: 'fas fa-bell' },
+      { name: 'Backend Development', icon: 'fas fa-server' },
+      { name: 'Frontend Development', icon: 'fas fa-code' },
+      { name: 'Plugin Architecture', icon: 'fas fa-plug' },
+    ],
+    technologies: [
+      { name: 'Vue.js', icon: 'fab fa-vuejs' },
+      { name: 'Quasar', icon: 'fab fa-vuejs' },
+      { name: 'Node.js', icon: 'fab fa-node-js' },
+      { name: 'Express.js', icon: 'fas fa-server' },
+      { name: 'PostgreSQL', icon: 'fas fa-database' },
+      { name: 'Push Notifications', icon: 'fas fa-bell' },
     ],
   },
 
@@ -171,6 +149,32 @@ export default [
   },
 
   {
+    name: 'Receipts - Group Expenses Tracker',
+    images: [
+      '/receipts/1.png',
+      '/receipts/2.png',
+      '/receipts/3.png',
+      '/receipts/receipts.mp4',
+    ],
+    description:
+      'A homebrew group expenses tracker that allows friends to list how much each person spent and how much they owe or are owed.<br><br>Users can add receipts, and view a summary of how much money they gain or lose, taking into account money to pay or receive from others. Built using Vue, Quasar, and Firebase for the realtime updates.',
+    main_discipline: {
+      name: 'Full Stack Development',
+      icon: 'fas fa-code',
+    },
+    disciplines: [
+      { name: 'Realtime Updates', icon: 'fas fa-sync' },
+      { name: 'Firebase', icon: 'fas fa-database' },
+      { name: 'Frontend Development', icon: 'fas fa-code' },
+    ],
+    technologies: [
+      { name: 'Vue.js', icon: 'fab fa-vuejs' },
+      { name: 'Quasar', icon: 'fab fa-vuejs' },
+      { name: 'Firebase Firestore', icon: 'fas fa-database' },
+    ],
+  },
+
+  {
     name: 'Dysglopia The Game',
     description:
       "An accessible real-time battle game featuring dynamic and fast-paced combat with you and an enemy's 'gloops.'.<br><br>Players compete to defeat all of their opponent’s gloops in reflex-driven, high-octane gameplay. Built using Unity and C#.",
@@ -192,6 +196,32 @@ export default [
       '/dysglopiagame/1.png',
       '/dysglopiagame/2.png',
       '/dysglopiagame/gameplay.mp4',
+    ],
+  },
+
+  {
+    name: 'Bilibenta - E-commerce Platform',
+    description:
+      'A mock e-commerce platform designed for farmers to deliver products directly to buyers. Focused on UI/UX design with a seamless experience for browsing and purchasing items such as rice, wheat, and meat.<br><br>Implemented using Quasar (Vue), Vue, Tailwind, and TanStack Query.',
+    main_discipline: {
+      name: 'UI/UX Design',
+      icon: 'fas fa-paint-brush',
+    },
+    disciplines: [
+      { name: 'UI/UX Design', icon: 'fas fa-paint-brush' },
+      { name: 'Frontend Development', icon: 'fas fa-code' },
+      { name: 'E-commerce', icon: 'fas fa-shopping-cart' },
+    ],
+    technologies: [
+      { name: 'Quasar', icon: 'fab fa-vuejs' },
+      { name: 'Vue.js', icon: 'fab fa-vuejs' },
+      { name: 'Tailwind CSS', icon: 'fab fa-css3-alt' },
+      { name: 'TanStack Query', icon: 'fas fa-database' },
+    ],
+    images: [
+      '/bilibenta/1.png',
+      // '/bilibenta/2.png',
+      '/bilibenta/Bilibenta.mp4',
     ],
   },
 
