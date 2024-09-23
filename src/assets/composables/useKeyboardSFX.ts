@@ -42,7 +42,7 @@ export const useKeyboardSFX = () => {
     if (muted.value) return;
 
     try {
-      gainNode.gain.setValueAtTime(0.25, context.currentTime);
+      gainNode.gain.setValueAtTime(0.2, context.currentTime);
       const selectedBuffer =
         buffers[Math.floor(Math.random() * buffers.length)];
 
