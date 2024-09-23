@@ -6,6 +6,7 @@
     <div
       ref="projectItem"
       class="tw-ring-1 tw-ring-white/25 tw-flex-1 tw-flex tw-relative tw-rounded-xl tw-m-4 tw-p-4 tw-overflow-hidden tw-duration-300 tw-transition-transform tw-ease-out-expo tw-z-50"
+      :class="!allImagesLoaded ? 'tw-min-h-64' : ''"
       :style="`aspect-ratio: ${lowestAspectRatio};`"
     >
       <!-- <div
@@ -16,6 +17,10 @@
         >
         </div>
       </div> -->
+
+      <div
+        class="tw-absolute tw-min-h-32 -tw-z-[1] tw-top-0 tw-left-0 tw-right-0 tw-bg-gradient-to-b tw-from-black via-black/60 tw-to-transparent"
+      ></div>
 
       <div
         class="tw-flex tw-flex-col tw-w-full -tw-space-y-1 tw-pointer-events-none"
@@ -66,26 +71,26 @@
         </div> -->
       </div>
 
-      <div
-        class="tw-absolute tw-top-0 tw-left-0 tw-right-0 tw-h-32 -tw-z-[1] tw-bg-gradient-to-b tw-from-black/70 tw-to-transparent"
-      ></div>
-
       <transition-group name="fade">
         <div
-          v-if="activeImageURL.includes('.mp4')"
+          v-if="activeImageURL.includes('.mp4') && allImagesLoaded"
           class="tw-bg-black tw-w-full tw-h-full tw-object-cover tw-absolute tw-top-0 tw-left-0 tw-bottom-0 tw-right-0 -tw-z-10"
         ></div>
         <img
-          v-else
+          v-else-if="!activeImageURL.includes('.mp4') && allImagesLoaded"
           :src="activeImageURL"
           :key="activeImageURL"
           class="tw-object-cover tw-blur-lg tw-absolute tw-h-full tw-w-full tw-top-0 tw-left-0 tw-bottom-0 tw-right-0 -tw-z-10"
+        />
+        <q-skeleton
+          v-else
+          class="tw-object-cover tw-absolute tw-h-full tw-w-full tw-top-0 tw-left-0 tw-bottom-0 tw-right-0"
         />
       </transition-group>
 
       <transition-group name="fade">
         <video
-          v-if="activeImageURL.includes('.mp4')"
+          v-if="activeImageURL.includes('.mp4') && allImagesLoaded"
           autoplay
           loop
           muted
@@ -94,13 +99,19 @@
           class="tw-w-full tw-h-full tw-object-contain tw-absolute tw-top-0 tw-left-0 tw-bottom-0 tw-right-0 -tw-z-10"
         ></video>
         <img
-          v-else
+          v-else-if="!activeImageURL.includes('.mp4') && allImagesLoaded"
           :src="activeImageURL"
           :key="activeImageURL"
           :class="showDetails ? '' : 'slow-zoom'"
           :style="'animation-delay: ' + slowZoomAnimationDelay + 's'"
           class="tw-object-contain tw-absolute tw-h-full tw-w-full tw-top-0 tw-left-0 tw-bottom-0 tw-right-0 -tw-z-10"
         />
+        <div
+          v-else
+          class="tw-absolute tw-h-full tw-w-full tw-top-0 tw-left-0 tw-bottom-0 tw-right-0 tw-flex tw-justify-center tw-items-center -tw-z-10"
+        >
+          <div class="tw-font-mono tw-text-lg tw-tracking-wider">LOADING</div>
+        </div>
       </transition-group>
     </div>
     <transition mode="out-in" name="details">
@@ -344,6 +355,8 @@ const images = ref([...(project?.images ?? [])]);
 
 const lowestAspectRatio = ref(0);
 
+const allImagesLoaded = ref(false);
+
 onMounted(async () => {
   const ratios = await Promise.all(
     images.value.map(async (url) => {
@@ -363,6 +376,8 @@ onMounted(async () => {
       return img.width / img.height;
     })
   );
+
+  allImagesLoaded.value = true;
 
   lowestAspectRatio.value = Math.min(...ratios);
   // lowestAspectRatio.value =
