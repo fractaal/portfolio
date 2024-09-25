@@ -290,6 +290,16 @@
           ></div>
         </div>
         <div
+          class="tw-flex tw-flex-col xs:tw-flex-row tw-items-center tw-justify-center"
+        >
+          <div class="tw-flex tw-justify-center tw-my-4">
+            <a href="mailto:ben.jude.dev@gmail.com">
+              <q-icon name="fa-solid fa-envelope" class="tw-text-2xl tw-mr-2" />
+              ben.jude.dev@gmail.com
+            </a>
+          </div>
+        </div>
+        <div
           class="tw-flex tw-flex-col xs:tw-flex-row lg:tw-gap-8 tw-gap-4 tw-mt-4 tw-mx-auto tw-w-fit"
         >
           <div
