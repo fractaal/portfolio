@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.16.4",
+    "@quasar/icongenie": "^4.0.0",
     "@tresjs/cientos": "^4.0.2",
     "@tresjs/core": "^4.2.10",
     "@vueuse/core": "^11.1.0",
