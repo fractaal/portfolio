@@ -41,6 +41,12 @@ export const useKeyboardSFX = () => {
   const play = () => {
     if (muted.value) return;
 
+    if (context.state === 'suspended') {
+      console.log('Not playing keyboard sfx because context is suspended');
+      context.resume();
+      return;
+    }
+
     try {
       gainNode.gain.setValueAtTime(0.2, context.currentTime);
       const selectedBuffer =
