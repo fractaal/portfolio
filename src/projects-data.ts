@@ -221,7 +221,7 @@ export default [
     images: [
       '/bilibenta/1.png',
       // '/bilibenta/2.png',
-      '/bilibenta/Bilibenta.mp4',
+      '/bilibenta/bilibenta.mp4',
     ],
   },
 
