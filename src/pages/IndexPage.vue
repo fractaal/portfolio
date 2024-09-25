@@ -880,11 +880,23 @@ const unmuteAndLerpValues = async () => {
 
 let a = 0;
 
-if (muted.value) {
-  a = 1;
-} else {
-  a = 0;
-}
+watch(muted, async (val) => {
+  if (val) {
+    for (let i = 0; i < 50; i++) {
+      a = i / 50;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+
+    a = 1;
+  } else {
+    for (let i = 0; i < 50; i++) {
+      a = 1 - i / 50;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+
+    a = 0;
+  }
+});
 
 function stepped(t: number) {
   return t < 0.5 ? 0 : 1;
@@ -926,7 +938,7 @@ setInterval(() => {
 
   multiplier -= multiplierAcceleration;
 
-  const newMultiplier = 0.75 + smoothHeartbeat(getPlaybackTime()) * 0.25;
+  let newMultiplier = 0.75 + smoothHeartbeat(getPlaybackTime()) * 0.25;
 
   if (multiplier < newMultiplier) {
     multiplier = newMultiplier;
@@ -937,6 +949,8 @@ setInterval(() => {
 
   recentMultipliers.unshift(multiplier);
   recentMultipliers.length = 5;
+
+  console.log(recentMultipliers);
 
   let sum = 0;
   for (let i = 0; i < recentMultipliers.length; i++) {
