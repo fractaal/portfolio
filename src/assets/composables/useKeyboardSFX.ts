@@ -1,41 +1,41 @@
 import { ref } from 'vue';
 
-const context = new AudioContext();
-
-const source = context.createBufferSource();
-const gainNode = context.createGain();
-
-source.loop = true;
-
-source.connect(gainNode);
-gainNode.connect(context.destination);
-
 const buffers: AudioBuffer[] = [];
 
-(async () => {
-  buffers.push(
-    await context.decodeAudioData(
-      await (await fetch('/keys1.wav')).arrayBuffer()
-    )
-  );
-  buffers.push(
-    await context.decodeAudioData(
-      await (await fetch('/keys2.wav')).arrayBuffer()
-    )
-  );
-  buffers.push(
-    await context.decodeAudioData(
-      await (await fetch('/keys3.wav')).arrayBuffer()
-    )
-  );
-  buffers.push(
-    await context.decodeAudioData(
-      await (await fetch('/keys4.wav')).arrayBuffer()
-    )
-  );
-})();
+export const useKeyboardSFX = (context: AudioContext, out: AudioNode) => {
+  if (!out) {
+    throw new Error('Output node is required');
+  }
 
-export const useKeyboardSFX = () => {
+  const source = context.createBufferSource();
+  const gainNode = context.createGain();
+
+  source.loop = true;
+  source.connect(gainNode);
+
+  (async () => {
+    buffers.push(
+      await context.decodeAudioData(
+        await (await fetch('/keys1.wav')).arrayBuffer()
+      )
+    );
+    buffers.push(
+      await context.decodeAudioData(
+        await (await fetch('/keys2.wav')).arrayBuffer()
+      )
+    );
+    buffers.push(
+      await context.decodeAudioData(
+        await (await fetch('/keys3.wav')).arrayBuffer()
+      )
+    );
+    buffers.push(
+      await context.decodeAudioData(
+        await (await fetch('/keys4.wav')).arrayBuffer()
+      )
+    );
+  })();
+
   const muted = ref(false);
 
   const play = () => {
@@ -54,7 +54,7 @@ export const useKeyboardSFX = () => {
 
       const source = context.createBufferSource();
       source.buffer = selectedBuffer;
-      source.connect(gainNode);
+      source.connect(out);
       source.start();
     } catch (e) {
       console.log('Could not play keyboard sfx: ', e);
