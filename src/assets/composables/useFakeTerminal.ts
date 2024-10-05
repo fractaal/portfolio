@@ -7,10 +7,10 @@ type Line = {
   classNames?: string;
 };
 
-export const useFakeTerminal = () => {
+export const useFakeTerminal = (context: AudioContext, out: AudioNode) => {
   const lines = ref<Line[]>([]);
 
-  const keyboardSFX = useKeyboardSFX();
+  const keyboardSFX = useKeyboardSFX(context, out);
 
   const wipeOutLine = async (index: number) => {
     let first = true;
