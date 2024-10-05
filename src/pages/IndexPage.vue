@@ -2,12 +2,16 @@
   <q-page class="">
     <div class="tw-flex-1 tw-fixed tw-p-8 tw-z-50">
       <q-btn
-        @click="muted ? unmuteAndLerpValues() : muteAndLerpValues()"
+        @click="volume.muted.value ? volume.unmute() : volume.mute()"
         class="tw-p-4 rounded-full"
         unelevated
       >
         <q-icon
-          :name="muted ? 'fa-solid fa-volume-mute' : 'fa-solid fa-volume-up'"
+          :name="
+            volume.muted.value
+              ? 'fa-solid fa-volume-mute'
+              : 'fa-solid fa-volume-up'
+          "
         />
       </q-btn>
 
@@ -157,32 +161,32 @@
               flat
               no-caps
               class="tw-bg-white/5"
-              @click="whoAreYouCommand"
-              :loading="termBusy"
+              @click="termAnims.whoAreYouCommand"
+              :loading="termAnims.termBusy.value"
               >Who are you?</q-btn
             >
             <q-btn
               flat
               no-caps
               class="tw-bg-white/5"
-              @click="clearCommand"
-              :loading="termBusy"
+              @click="termAnims.clearCommand"
+              :loading="termAnims.termBusy.value"
               >Clear terminal</q-btn
             >
             <q-btn
               flat
               no-caps
               class="tw-bg-white/5"
-              @click="toggleMusicTerm"
-              :loading="termBusy"
+              @click="termAnims.toggleMusicTerm"
+              :loading="termAnims.termBusy.value"
               >Toggle music</q-btn
             >
             <q-btn
               flat
               no-caps
               class="tw-bg-white/5 tw-min-w-6"
-              @click="rmRf"
-              :loading="termBusy"
+              @click="termAnims.rmRf"
+              :loading="termAnims.termBusy.value"
               >Delete everything</q-btn
             >
           </div>
@@ -374,7 +378,7 @@
 <script setup lang="ts">
 import { useScroll } from '@vueuse/core';
 import { useMusic } from 'src/assets/composables/useMusic';
-import { useKeyboardSFX } from 'src/assets/composables/useKeyboardSFX';
+import { useFakeTerminalAnimations } from 'src/assets/composables/useFakeTerminalAnimations';
 import { useFakeTerminal } from 'src/assets/composables/useFakeTerminal';
 import { useRouter } from 'vue-router';
 import ProjectItem from 'src/components/ProjectItem.vue';
@@ -390,6 +394,22 @@ const hideEverything = ref(false);
 const router = useRouter();
 
 import { computed, ref, onMounted, watch } from 'vue';
+import useAudioVolume from 'src/assets/composables/useAudioVolume';
+
+const glow1Opacity = ref(1);
+const glow2Opacity = ref(1);
+const glow3Opacity = ref(1);
+const glow4Opacity = ref(1);
+
+const blinkerOpacity = ref(100);
+
+const volume = useAudioVolume();
+
+const music = useMusic(volume.context, volume.gainNode);
+const term = useFakeTerminal(volume.context, volume.gainNode);
+const termAnims = useFakeTerminalAnimations(term, volume, music);
+
+let textUsed: string[] = [];
 
 const termScroll = ref<HTMLElement | null>(null);
 
@@ -397,7 +417,7 @@ onMounted(() => {
   const scroll = useScroll(termScroll);
 
   const o = new MutationObserver(() => {
-    if (termBusy.value) {
+    if (termAnims.termBusy.value) {
       scroll.y.value = 999;
     }
   });
@@ -408,369 +428,6 @@ onMounted(() => {
     subtree: true,
   });
 });
-
-// const scrollValue = ref(0);
-// const scroll = useWindowScroll();
-
-// function updateScroll() {
-//   requestAnimationFrame(updateScroll);
-
-//   scrollValue.value = scroll.y.value / 2000;
-// }
-
-// updateScroll();
-
-const glow1Opacity = ref(1);
-const glow2Opacity = ref(1);
-const glow3Opacity = ref(1);
-const glow4Opacity = ref(1);
-
-let offset = 0;
-const translucentNamesXOffset = ref(0);
-const blinkerOpacity = ref(100);
-
-const name = 'Ben Jude';
-const display = ref(name);
-
-const term = useFakeTerminal();
-
-const termBusy = ref(false);
-
-const {
-  mute,
-  unmute,
-  muted,
-  context: audioContext,
-  controlsEnabled,
-  crash,
-  beatMap,
-  getPlaybackTime,
-  bpm,
-} = useMusic();
-
-const keyboardSFX = useKeyboardSFX();
-
-async function toggleMusicTerm() {
-  termBusy.value = true;
-
-  if (!term.isLatestLinePrompt()) {
-    term.newPromptStringLine();
-  }
-
-  await term.wipeOutLatestLine();
-
-  if (!controlsEnabled.value) {
-    await term.fillInLatestLine('toggle_music');
-
-    await term.keyboardSFX.playFullVolume();
-    await term.newOutputStringLine();
-
-    await term.wait(250);
-
-    await term.fillInLatestLinePerWord(
-      '⚠ Controls disabled for now, try again later'
-    );
-
-    await term.newPromptStringLine();
-
-    await term.wait(500);
-
-    termBusy.value = false;
-    return;
-  }
-
-  if (muted.value) {
-    await term.fillInLatestLine('unmute');
-
-    await term.keyboardSFX.playFullVolume();
-    await term.newOutputStringLine();
-
-    unmuteAndLerpValues();
-
-    await term.wait(1250);
-
-    await term.fillInLatestLinePerWord('🔊 Music unmuted');
-  } else {
-    await term.fillInLatestLine('mute');
-
-    await term.keyboardSFX.playFullVolume();
-    await term.newOutputStringLine();
-
-    muteAndLerpValues();
-
-    await term.wait(1250);
-
-    await term.fillInLatestLinePerWord('🔇 Music muted');
-  }
-
-  await term.emulatePressEnterOnLatestLine();
-
-  termBusy.value = false;
-}
-
-async function clearCommand() {
-  termBusy.value = true;
-  if (!term.isLatestLinePrompt()) {
-    term.newPromptStringLine();
-  }
-
-  await term.wipeOutLatestLine();
-
-  await term.fillInLatestLine('clear');
-  await term.emulatePressEnterOnLatestLine();
-
-  await term.wait(500);
-
-  await term.clearLines();
-
-  await term.wait(500);
-
-  await term.newPromptStringLine();
-
-  termBusy.value = false;
-}
-
-async function whoAreYouCommand() {
-  termBusy.value = true;
-  if (!term.isLatestLinePrompt()) {
-    term.newPromptStringLine();
-  }
-
-  await term.wipeOutLatestLine();
-
-  await term.wait(250);
-
-  await term.fillInLatestLine('neofetch');
-
-  await term.keyboardSFX.playFullVolume();
-  await term.newOutputStringLine(
-    "Hey! My name's Benedict Jude A. Rocat -- but I often just go by Ben Jude."
-  );
-
-  await term.wait(500);
-
-  await term.newOutputStringLine(
-    '🚀 I make cohesive software, visual & acoustic experiences.'
-  );
-
-  await term.wait(700);
-
-  // const lines = [
-  //   '      ___   ____________________________    __________  ___    _   __________________',
-  //   '   /   | / ____/ ____/ ____/ ___/ ___/   / ____/ __ \\/   |  / | / /_  __/ ____/ __ \\',
-  //   '  / /| |/ /   / /   / __/  \__ \\__ \   / / __/ /_/ / /| | /  |/ / / / / __/ / / / /',
-  //   ' / ___ / /___/ /___/ /___ ___/ /__/ /  / /_/ / _, _/ ___ |/ /|  / / / / /___/ /_/ /',
-  //   '/_/  |_\\____/\\____/_____//____/____/   \\____/_/ |_/_/  |_/_/ |_/ /_/ /_____/_____/',
-  // ];
-
-  // for (let i = 0; i < lines.length; i++) {
-  //   await term.newOutputStringLine(lines[i]);
-
-  //   await term.wait(Math.random() > 0.9 ? 250 : 20);
-  // }
-
-  await term.wait(700);
-  await term.newOutputStringLine();
-  await term.wait(250);
-  await term.newOutputStringLine(
-    'My experience is varied, but mainly focused on the following:'
-  );
-
-  await term.wait(1250);
-  await term.newOutputStringLine();
-
-  // 💻 WEBDEV | ✨ VIDEO & VFX | 📦 3D | 🎮 GAMEDEV | 🎶 MUSIC'
-
-  const lines = [
-    '💻 WEBDEV',
-    '✨ VIDEO & VFX',
-    '📦 3D',
-    '🎮 GAMEDEV',
-    '🎶 MUSIC',
-  ];
-
-  for (let i = 0; i < lines.length; i++) {
-    await term.newOutputStringLine(' - ' + lines[i]);
-
-    await term.wait(100);
-  }
-
-  await term.newPromptStringLine();
-
-  await term.wait(500);
-
-  termBusy.value = false;
-}
-
-async function rmRf() {
-  termBusy.value = true;
-  if (!term.isLatestLinePrompt()) {
-    term.newPromptStringLine();
-  }
-
-  await term.wipeOutLatestLine();
-
-  await term.wait(250);
-
-  await term.fillInLatestLine('rm -rf --no-preserve-root /');
-
-  await term.keyboardSFX.playFullVolume();
-  await term.newOutputStringLine();
-
-  await term.wait(500);
-
-  await term.newOutputStringLine(
-    'WARNING! This is a non-standard Linux configuration (faux_linux 5.3.1)'
-  );
-
-  await term.wait(300);
-
-  await term.newOutputStringLine(
-    "DO NOT PROCEED UNLESS This is a scary warning message that's supposed to show up for just a moment!"
-  );
-
-  await term.wait(150);
-  await term.newOutputStringLine();
-  await term.wait(150);
-
-  await term.newOutputStringLine('Are you sure you want to proceed?');
-
-  await term.wait(150);
-
-  await term.newPromptStringLine();
-
-  await term.fillInLatestLine('y');
-
-  await term.emulatePressEnterOnLatestLine();
-
-  // (async () => {
-  //   for (let i = 0; i < 10; i++) {
-  //     term.fillInLatestLinePerWord(
-  //       '☣ WHAT DID YOU DO ☣ WHAT DID YOU DO ☣ WHAT DID YOU DO ☣ WHAT DID YOU DO '
-  //     );
-
-  //     await term.wait(250 + Math.random() * 250);
-  //   }
-  // })();
-
-  function uuidv4() {
-    return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, (c) =>
-      (
-        +c ^
-        (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4)))
-      ).toString(16)
-    );
-  }
-
-  (async () => {
-    for (let i = 0; i < 5; i++) {
-      await term.newOutputStringLine(`/dev/sd${'abcdefghijklm'[i]}/`);
-
-      await term.wait(Math.random() > 0.9 ? 250 : 20);
-    }
-
-    for (let i = 0; i < 100; i++) {
-      await term.newOutputStringLine(`/home/users/benjude/${uuidv4()}`);
-
-      await term.wait(Math.random() > 0.99 ? 250 : 20);
-    }
-  })();
-
-  crash();
-
-  await term.wait(750);
-
-  const closeEvent = new CustomEvent('__destroy');
-
-  window.dispatchEvent(closeEvent);
-
-  // If didn't close one way or another, route to fallback page
-
-  router.push('/rmrf');
-}
-
-async function temporarilyChangeText(newText: string) {
-  const wipeOutLine = async () => {
-    let first = true;
-
-    const line = term.getLatestLine();
-    const content = line.content;
-
-    for (let i = 0; i < content.length; i++) {
-      if (termBusy.value) {
-        return;
-      }
-
-      line.content = content.slice(0, content.length - (i + 1));
-
-      keyboardSFX.play();
-
-      if (first) {
-        first = false;
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      } else {
-        await new Promise((resolve) => setTimeout(resolve, 60));
-      }
-    }
-  };
-
-  const fillInLine = async (text: string) => {
-    const line = term.getLatestLine();
-    const content = line.content;
-
-    for (let i = 0; i < text.length; i++) {
-      if (termBusy.value) {
-        return;
-      }
-
-      line.content = text.slice(0, i + 1);
-
-      keyboardSFX.play();
-
-      if (line.content[line.content.length - 1] === ' ') {
-        await new Promise((resolve) => setTimeout(resolve, 140));
-      } else {
-        await new Promise((resolve) => setTimeout(resolve, 70));
-      }
-    }
-  };
-
-  if (termBusy.value) {
-    return;
-  }
-
-  await wipeOutLine();
-
-  if (termBusy.value) {
-    return;
-  }
-
-  await new Promise((resolve) => setTimeout(resolve, 250));
-
-  if (termBusy.value) {
-    return;
-  }
-
-  await fillInLine(newText);
-
-  if (termBusy.value) {
-    return;
-  }
-
-  await new Promise((resolve) => setTimeout(resolve, 3500));
-
-  if (termBusy.value) {
-    return;
-  }
-
-  if (termBusy.value) {
-    return;
-  }
-
-  await new Promise((resolve) => setTimeout(resolve, 250));
-}
-
-let textUsed: string[] = [];
 
 onMounted(async () => {
   while (true) {
@@ -805,7 +462,7 @@ onMounted(async () => {
       continue;
     }
 
-    await temporarilyChangeText(
+    await termAnims.temporarilyChangeText(
       texts[Math.floor(Math.random() * texts.length)]
     );
   }
@@ -821,11 +478,11 @@ function easeInOutExpo(x: number): number {
     : (2 - Math.pow(2, -20 * x + 10)) / 2;
 }
 
-const beatPeriod = 60 / (bpm.value * 4);
+const beatPeriod = 60 / (music.bpm.value * 4);
 
 // Define your beat map
 
-const totalBeats = beatMap.value.length;
+const totalBeats = music.beatMap.value.length;
 
 function smoothHeartbeat(time: number) {
   const beatNumber = Math.floor(time / beatPeriod);
@@ -837,66 +494,20 @@ function smoothHeartbeat(time: number) {
 
   let out = 0;
 
-  if (beatMap.value[beatIndex]) {
+  if (music.beatMap.value[beatIndex]) {
     // Linearly decay from 1 to 0 over the beat period
 
     out = Math.pow(1 - timeSinceBeat / beatPeriod, 3);
   }
 
   debugTDisplay.value = `${beatIndex + 1} (${
-    beatMap.value[beatIndex] ? 'ON' : 'OFF'
+    music.beatMap.value[beatIndex] ? 'ON' : 'OFF'
   }) (${out.toFixed(2)}) (${time.toFixed(2)}) (${currentBeatTime.toFixed(
     2
   )}) (${timeSinceBeat.toFixed(2)})`;
 
   return out; // Inactive beat
 }
-
-const muteAndLerpValues = async () => {
-  if (!controlsEnabled.value) return;
-
-  mute();
-
-  for (let i = 0; i < 50; i++) {
-    a = i / 50;
-    await new Promise((resolve) => setTimeout(resolve, 10));
-  }
-
-  a = 1;
-};
-
-const unmuteAndLerpValues = async () => {
-  if (!controlsEnabled.value) return;
-
-  unmute();
-
-  for (let i = 0; i < 50; i++) {
-    a = 1 - i / 50;
-    await new Promise((resolve) => setTimeout(resolve, 10));
-  }
-
-  a = 0;
-};
-
-let a = 0;
-
-watch(muted, async (val) => {
-  if (val) {
-    for (let i = 0; i < 50; i++) {
-      a = i / 50;
-      await new Promise((resolve) => setTimeout(resolve, 10));
-    }
-
-    a = 1;
-  } else {
-    for (let i = 0; i < 50; i++) {
-      a = 1 - i / 50;
-      await new Promise((resolve) => setTimeout(resolve, 10));
-    }
-
-    a = 0;
-  }
-});
 
 function stepped(t: number) {
   return t < 0.5 ? 0 : 1;
@@ -914,9 +525,10 @@ const wavesSpeed = ref(1);
 const noiseStrength = ref(1);
 
 setInterval(() => {
+  let a = volume.muted.value ? 1 : 0;
   let twiceAsFastT =
-    (getPlaybackTime() % (60 / (bpm.value * (2 / 3)))) /
-    (60 / (bpm.value * (2 / 3)));
+    (music.getPlaybackTime() % (60 / (music.bpm.value * (2 / 3)))) /
+    (60 / (music.bpm.value * (2 / 3)));
 
   let twiceAsFastFallbackT = (performance.now() % 2000) / 2000;
   let fallbackT = (performance.now() % 4000) / 4000;
@@ -938,7 +550,7 @@ setInterval(() => {
 
   multiplier -= multiplierAcceleration;
 
-  let newMultiplier = 0.75 + smoothHeartbeat(getPlaybackTime()) * 0.25;
+  let newMultiplier = 0.75 + smoothHeartbeat(music.getPlaybackTime()) * 0.25;
 
   if (multiplier < newMultiplier) {
     multiplier = newMultiplier;
@@ -949,8 +561,6 @@ setInterval(() => {
 
   recentMultipliers.unshift(multiplier);
   recentMultipliers.length = 5;
-
-  console.log(recentMultipliers);
 
   let sum = 0;
   for (let i = 0; i < recentMultipliers.length; i++) {
@@ -969,18 +579,6 @@ setInterval(() => {
   wavesSpeed.value = a * 0.5 + (1 - a) * wavesSpeed.value;
   noiseStrength.value = a * 1 + (1 - a) * noiseStrength.value;
 
-  // recentMultipliers.unshift(multiplier);
-  // recentMultipliers.length = 15;
-
-  // let sum = 0;
-  // for (let i = 0; i < recentMultipliers.length; i++) {
-  //   sum += recentMultipliers[i];
-  // }
-
-  // const finalMultiplier = sum / recentMultipliers.length + a * 2;
-
-  multiplier;
-
   glow1Opacity.value = (Math.sin(timeMs / 1000) / 2 + 0.5) * finalMultiplier;
   glow2Opacity.value =
     (Math.sin(timeMs / 1000 + Math.PI / 2) / 2 + 0.5) * finalMultiplier;
@@ -989,19 +587,6 @@ setInterval(() => {
   glow4Opacity.value =
     (Math.sin(timeMs / 1000 + (3 * Math.PI) / 2) / 2 + 0.5) * finalMultiplier;
 }, 25);
-
-// function animate() {
-//   requestAnimationFrame(animate);
-
-//   let now = Math.round((FPS * Date.now()) / 1000);
-//   console.log(now);
-//   if (now === prevTick) return;
-
-//   prevTick = now;
-
-// }
-
-// animate();
 
 function openYouTube() {
   window.open('https://www.youtube.com/@filmicvisuals');
