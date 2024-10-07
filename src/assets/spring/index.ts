@@ -53,7 +53,7 @@ export class SpringRGB {
   velocity: { r: number; g: number; b: number };
   target: { r: number; g: number; b: number };
 
-  constructor(stiffness = 5, damping = 5, mass = 1) {
+  constructor(stiffness = 10, damping = 5, mass = 1) {
     this.stiffness = stiffness;
     this.damping = damping;
     this.mass = mass;
