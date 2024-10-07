@@ -9,7 +9,12 @@
 
     <TresPerspectiveCamera :position="position" :rotation="[1.3, 0, 0]" />
     <!-- <TresPerspectiveCamera /> -->
-    <primitive ref="glowMesh" :object="_glowMesh">
+    <primitive
+      ref="glowMesh"
+      :object="_glowMesh"
+      :position="[0, 50, -35]"
+      :rotation="[3.14 / 2, 0, 0]"
+    >
       <TresShaderMaterial
         :vertex-shader="glowMeshVertexShader"
         :fragment-shader="glowMeshFragmentShader"
@@ -28,18 +33,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, shallowRef, computed, watch, PropType } from 'vue';
-import {
-  TresCanvas,
-  TresPrimitive,
-  useRenderLoop,
-  useTexture,
-} from '@tresjs/core';
+import { ref, shallowRef, PropType } from 'vue';
+import { TresCanvas, TresPrimitive, useRenderLoop } from '@tresjs/core';
 import * as THREE from 'three';
-import { OrbitControls } from '@tresjs/cientos';
+
+// import { OrbitControls } from '@tresjs/cientos';
 import ManualFPS from './ManualFPS.vue';
 
-import { Mesh, PlaneGeometry } from 'three';
+import { Mesh, PlaneGeometry, ShaderMaterial } from 'three';
 
 import wavesFragmentShader from 'src/components/FancyWaves/waves.frag';
 import wavesVertexShader from 'src/components/FancyWaves/waves.vert';
@@ -56,20 +57,18 @@ const _glowMesh = new Mesh(glowGeometry);
 
 const glowMeshUniforms = shallowRef({
   colors: {
-    value: [],
+    value: [
+      [1, 1, 1],
+      [1, 1, 1],
+      [1, 1, 1],
+      [1, 1, 1],
+      [1, 1, 1],
+    ],
   },
   time: { value: 0 },
 });
 
 const glowMesh = shallowRef<TresPrimitive | null>(null);
-
-watch(glowMesh, (value) => {
-  if (!value) return;
-
-  value.rotation.x = 3.14 / 2;
-  value.position.y = 50;
-  value.position.z = -35;
-});
 
 // ### ###
 
@@ -79,7 +78,7 @@ const _mesh = new Mesh(geometry);
 
 const mesh = shallowRef<TresPrimitive | null>(null);
 
-const position = ref([0, -3, 2]);
+const position = ref<[number, number, number]>([0, -3, 2]);
 
 function updateScroll() {
   requestAnimationFrame(updateScroll);
@@ -90,15 +89,17 @@ function updateScroll() {
 updateScroll();
 
 const props = defineProps({
-  speed: { type: Number, default: 1 },
-  noiseStrength: { type: Number, default: 1 },
+  speed: { type: Number, default: 1, required: true },
+  noiseStrength: { type: Number, default: 1, required: true },
   colors: {
     type: Array as PropType<{ r: number; g: number; b: number }[]>,
     required: true,
   },
 });
 
-onLoop(({ elapsed }) => {
+let firstFrame = true;
+
+onLoop(() => {
   if (!mesh.value) return;
 
   if (!Number.isFinite(mesh.value.material.uniforms.time.value)) {
@@ -124,6 +125,15 @@ onLoop(({ elapsed }) => {
 
   if (!glowMesh.value) return;
 
+  if (firstFrame) {
+    setTimeout(() => {
+      console.log('Force updating glowMesh uniforms');
+      (glowMesh.value!.material as ShaderMaterial).needsUpdate = true;
+      (glowMesh.value!.material as ShaderMaterial).uniformsNeedUpdate = true;
+    }, 1000);
+    firstFrame = false;
+  }
+
   glowMesh.value.material.uniforms.time.value += 0.005 * props.speed;
   glowMesh.value.material.uniforms.colors.value = colorVectors;
 });
@@ -131,12 +141,14 @@ onLoop(({ elapsed }) => {
 const uniforms = shallowRef({
   time: { value: 0 },
   noiseStrength: { value: 1 },
-  colors: { value: [] },
+  colors: {
+    value: [
+      [1, 1, 1],
+      [1, 1, 1],
+      [1, 1, 1],
+      [1, 1, 1],
+      [1, 1, 1],
+    ],
+  },
 });
-
-const vertexShader = ref(`
-`);
-
-const fragmentShader = ref(`
-`);
 </script>
