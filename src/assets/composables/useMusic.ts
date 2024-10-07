@@ -103,8 +103,7 @@ const music = [
           { r: 0.443, g: 0.349, b: 0.98 },
           { r: 0.765, g: 0.49, b: 0.733 },
         ],
-
-        bgGlowColorRotation: 0,
+        speedMult: 2,
       },
       {
         beatMap: ogCompBeatmap,
@@ -115,8 +114,7 @@ const music = [
           { r: 16 / 255, g: 29 / 255, b: 66 / 255 },
           { r: 137 / 255, g: 210 / 255, b: 220 / 255 },
         ],
-
-        bgGlowColorRotation: 90,
+        speedMult: 1,
       },
     ],
   },
@@ -133,7 +131,7 @@ const music = [
           { r: 0.443, g: 0.349, b: 0.98 },
           { r: 0.765, g: 0.49, b: 0.733 },
         ],
-        bgGlowColorRotation: 0,
+        speedMult: 1,
       },
       {
         beatMap: repeat(simsBeatMap, 4),
@@ -144,7 +142,7 @@ const music = [
           { r: 16 / 255, g: 29 / 255, b: 66 / 255 },
           { r: 137 / 255, g: 210 / 255, b: 220 / 255 },
         ],
-        bgGlowColorRotation: 90,
+        speedMult: 2,
       },
     ],
     title: 'The Sims Neighborhood Themes Remix',
@@ -163,7 +161,7 @@ const music = [
           { r: 0.443, g: 0.349, b: 0.98 },
           { r: 0.765, g: 0.49, b: 0.733 },
         ],
-        bgGlowColorRotation: 0,
+        speedMult: 1.5,
       },
       {
         beatMap: repeat(houseBeatMap, 4),
@@ -174,7 +172,39 @@ const music = [
           { r: 16 / 255, g: 29 / 255, b: 66 / 255 },
           { r: 137 / 255, g: 210 / 255, b: 220 / 255 },
         ],
-        bgGlowColorRotation: 90,
+        speedMult: 1.5,
+        noiseStrength: 1.25,
+      },
+    ],
+  },
+  {
+    file: '/music-house-2.flac',
+    bpm: 120,
+    title: '',
+    patterns: [
+      {
+        beatMap: repeat(houseBeatMap, 4),
+        colors: [
+          { r: 0.443 * 0.5, g: 0.349 * 0.5, b: 0.98 * 0.5 },
+          { r: 0, g: 0, b: 0 },
+          { r: 0, g: 0, b: 0 },
+          { r: 0, g: 0, b: 0 },
+          { r: 0, g: 0, b: 0 },
+        ],
+        noiseStrength: 0.5,
+        speedMult: 1,
+      },
+      {
+        beatMap: repeat(houseBeatMap, 4 * 4),
+        colors: [
+          { r: 0.416, g: 0.357, b: 0.988 },
+          { r: 0.976, g: 0.502, b: 0.384 },
+          { r: 0.827, g: 0.412, b: 0.867 },
+          { r: 0.443, g: 0.349, b: 0.98 },
+          { r: 0.765, g: 0.49, b: 0.733 },
+        ],
+        speedMult: 2,
+        noiseStrength: 1,
       },
     ],
   },
@@ -266,7 +296,8 @@ export const useMusic = (context: AudioContext, out: AudioNode) => {
     numPatterns: music[choiceIndex].patterns.length,
     colors: music[choiceIndex].patterns[0].colors,
     oneFourthBeatIndexAcrossPatterns: 0,
-    bgGlowColorRotation: music[choiceIndex].patterns[0].bgGlowColorRotation,
+    speedMult: music[choiceIndex].patterns[0].speedMult,
+    noiseStrength: music[choiceIndex].patterns[0].noiseStrength ?? 1,
   });
 
   function update() {
@@ -296,7 +327,8 @@ export const useMusic = (context: AudioContext, out: AudioNode) => {
         beatMap.value = pattern.beatMap;
         realtime.colors = pattern.colors;
         realtime.patternIndex = i;
-        realtime.bgGlowColorRotation = pattern.bgGlowColorRotation;
+        realtime.speedMult = pattern.speedMult;
+        realtime.noiseStrength = pattern.noiseStrength ?? 1;
 
         break;
       }
