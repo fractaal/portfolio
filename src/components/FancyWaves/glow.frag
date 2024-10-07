@@ -1,7 +1,7 @@
 precision mediump float;
-uniform vec4 colors[5];
 uniform float time;
 
+varying vec4 vColors[5];
 varying vec2 vUv;
 
 // Description : Array and textureless GLSL 2D/3D/4D simplex
@@ -105,7 +105,7 @@ float map(float value, float min1, float max1, float min2, float max2) {
 
 void main() {
 
-  vec4 color = colors[0];
+  vec4 color = vColors[0];
 
   for(int i = 1; i < 5; i++) {
     float noiseFlow = (1.0 + float(i) * 0.5) * 0.05;
@@ -115,11 +115,13 @@ void main() {
     float noiseFloor = 0.1;
     float noiseCeil = 0.6;
 
-    float noise = smoothstep(noiseFloor, noiseCeil, snoise(vec3(vUv.x * 30.0, vUv.y * 3.0, time * noiseSpeed + noiseSeed)));
+    float noise = smoothstep(noiseFloor, noiseCeil, snoise(vec3(vUv.x * 15.0, vUv.y * 1.0, time * noiseSpeed + noiseSeed)));
 
-    color = mix(color, colors[i], noise);
+    color = mix(color, vColors[i], noise);
 
     color.a = 1.0 - smoothstep(0.7, 0.9, vUv.y);
+
+    // color = vec4(float(i)/5.0, 0.0, 0.0, 1.0);
   }
 
   // Output the final blended color
