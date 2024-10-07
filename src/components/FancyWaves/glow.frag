@@ -116,7 +116,7 @@ void main() {
     float noiseFloor = 0.1;
     float noiseCeil = 0.6;
 
-    float noise = smoothstep(noiseFloor, noiseCeil, snoise(vec3(vUv.x * 15.0, vUv.y * 0.5, time * noiseSpeed + noiseSeed)));
+    float noise = smoothstep(noiseFloor, noiseCeil, snoise(vec3(vUv.x * 5.0, vUv.y * 0.5, time * noiseSpeed + noiseSeed)));
 
     color = mix(color, vColors[i], noise);
 
