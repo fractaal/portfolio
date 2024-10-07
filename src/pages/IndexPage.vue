@@ -449,6 +449,32 @@
       </div>
     </section>
 
+    <q-page-sticky
+      position="bottom-right"
+      :offset="[50, 50]"
+      class="tw-text-lg"
+    >
+      <div
+        v-if="music.fetching.value"
+        class="tw-flex tw-justify-center tw-items-center"
+      >
+        <q-spinner size="40px" class="tw-mr-4" />
+        Loading some music...
+      </div>
+      <div
+        v-else
+        class="stay-for-moment-then-slide-right tw-flex tw-justify-center tw-items-center"
+      >
+        <q-icon
+          name="fas fa-check"
+          size="40px"
+          class="tw-mr-4 tw-flex tw-items-center tw-justify-center"
+        >
+        </q-icon>
+        Loading music done!
+      </div>
+    </q-page-sticky>
+
     <!-- <div class="2xl:tw-w-3/5 tw-w-5/6 tw-mx-auto"></div> -->
     <!-- <div
       class="tw-font-mono tw-tracking-wider tw-text-lg tw-text-center tw-w-full"
@@ -697,6 +723,21 @@ function openSoundCloud() {
 .restore-after-show {
   animation: fadeIn 1s cubic-bezier(0.19, 1, 0.22, 1) forwards;
   transform: translateZ(-1px);
+}
+
+.stay-for-moment-then-slide-right {
+  animation: slideRight 1s cubic-bezier(0.86, 0, 0.07, 1) 1s forwards;
+  transform: translateZ(-1px);
+}
+
+@keyframes slideRight {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(200%);
+  }
 }
 
 /* @keyframes ping {

@@ -1,6 +1,6 @@
 import { LocalStorage } from 'quasar';
 import { PlaybackPositionNode } from 'src/classes/PlaybackPositionNode';
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 
 function repeat<T>(arr: T[], n: number) {
   return Array(n)
@@ -241,12 +241,20 @@ export const useMusic = (context: AudioContext, out: AudioNode) => {
     throw new Error('No context provided');
   }
 
+  const fetchingMusic = ref(true);
+  const fetchingCrashBite = ref(true);
+
+  const fetching = computed(
+    () => fetchingMusic.value || fetchingCrashBite.value,
+  );
+
   fetch(music[choiceIndex].file).then((response) => {
     response.arrayBuffer().then((buffer) => {
       context.decodeAudioData(buffer).then((buffer) => {
         source.buffer = buffer;
 
         console.log('Loaded source buffer - ', source.buffer);
+        fetchingMusic.value = false;
       });
     });
   });
@@ -257,6 +265,7 @@ export const useMusic = (context: AudioContext, out: AudioNode) => {
         crashSource.buffer = buffer;
 
         console.log('Loaded crash buffer - ', crashSource.buffer);
+        fetchingCrashBite.value = false;
       });
     });
   });
@@ -375,5 +384,6 @@ export const useMusic = (context: AudioContext, out: AudioNode) => {
     hasBeatAtIndex,
     beatMap,
     bpm,
+    fetching,
   };
 };
