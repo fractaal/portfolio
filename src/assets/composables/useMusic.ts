@@ -295,7 +295,7 @@ export const useMusic = (context: AudioContext, out: AudioNode) => {
     patternIndex: 0,
     numPatterns: music[choiceIndex].patterns.length,
     colors: music[choiceIndex].patterns[0].colors,
-    oneFourthBeatIndexAcrossPatterns: 0,
+    oneFourthBeatIndexInPattern: 0,
     speedMult: music[choiceIndex].patterns[0].speedMult,
     noiseStrength: music[choiceIndex].patterns[0].noiseStrength ?? 1,
   });
@@ -314,16 +314,15 @@ export const useMusic = (context: AudioContext, out: AudioNode) => {
       0,
     );
 
-    let oneFourthBeatIndexAcrossPatterns =
+    let oneFourthBeatIndexInPattern =
       realtime.oneFourthBeatIndex % totalFourthBeats;
 
-    realtime.oneFourthBeatIndexAcrossPatterns =
-      oneFourthBeatIndexAcrossPatterns;
+    realtime.oneFourthBeatIndexInPattern = oneFourthBeatIndexInPattern;
 
     for (let i = 0; i < music[choiceIndex].patterns.length; i++) {
       const pattern = music[choiceIndex].patterns[i];
 
-      if (oneFourthBeatIndexAcrossPatterns < pattern.beatMap.length) {
+      if (oneFourthBeatIndexInPattern < pattern.beatMap.length) {
         beatMap.value = pattern.beatMap;
         realtime.colors = pattern.colors;
         realtime.patternIndex = i;
@@ -333,7 +332,8 @@ export const useMusic = (context: AudioContext, out: AudioNode) => {
         break;
       }
 
-      oneFourthBeatIndexAcrossPatterns -= pattern.beatMap.length;
+      oneFourthBeatIndexInPattern -= pattern.beatMap.length;
+      realtime.oneFourthBeatIndexInPattern = oneFourthBeatIndexInPattern;
     }
 
     requestAnimationFrame(update);
