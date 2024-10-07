@@ -10,10 +10,11 @@
     <TresPerspectiveCamera :position="position" :rotation="[1.3, 0, 0]" />
     <!-- <TresPerspectiveCamera /> -->
     <primitive
+      v-if="showGlowMesh"
       ref="glowMesh"
       :object="_glowMesh"
       :position="[0, 50, -35]"
-      :rotation="[3.14 / 2, 0, 0]"
+      :rotation="[1, 0, 0]"
     >
       <TresShaderMaterial
         :vertex-shader="glowMeshVertexShader"
@@ -33,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, shallowRef, PropType } from 'vue';
+import { ref, shallowRef, PropType, onMounted } from 'vue';
 import { TresCanvas, TresPrimitive, useRenderLoop } from '@tresjs/core';
 import * as THREE from 'three';
 
@@ -69,6 +70,7 @@ const glowMeshUniforms = shallowRef({
 });
 
 const glowMesh = shallowRef<TresPrimitive | null>(null);
+const showGlowMesh = ref(false);
 
 // ### ###
 
@@ -97,7 +99,14 @@ const props = defineProps({
   },
 });
 
-let firstFrame = true;
+onMounted(() => {
+  setTimeout(() => {
+    console.log('Force updating glowMesh uniforms');
+    showGlowMesh.value = true;
+    (glowMesh.value!.material as ShaderMaterial).needsUpdate = true;
+    (glowMesh.value!.material as ShaderMaterial).uniformsNeedUpdate = true;
+  }, 1000);
+});
 
 onLoop(() => {
   if (!mesh.value) return;
@@ -124,15 +133,6 @@ onLoop(() => {
   mesh.value.material.uniforms.noiseStrength.value = props.noiseStrength;
 
   if (!glowMesh.value) return;
-
-  if (firstFrame) {
-    setTimeout(() => {
-      console.log('Force updating glowMesh uniforms');
-      (glowMesh.value!.material as ShaderMaterial).needsUpdate = true;
-      (glowMesh.value!.material as ShaderMaterial).uniformsNeedUpdate = true;
-    }, 1000);
-    firstFrame = false;
-  }
 
   glowMesh.value.material.uniforms.time.value += 0.005 * props.speed;
   glowMesh.value.material.uniforms.colors.value = colorVectors;
