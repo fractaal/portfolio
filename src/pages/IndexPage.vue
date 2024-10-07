@@ -204,8 +204,16 @@
       v-if="showStatsForNerds"
       class="lg:tw-w-4/6 tw-mx-auto tw-ring-1 tw-ring-white/20 tw-mt-12 tw-font-mono tw-p-4 tw-rounded-xl tw-bg-black/80 tw-flex tw-flex-col"
     >
-      <h1 class="tw-text-2xl tw-font-black">Stats for nerds</h1>
-      <h2 class="tw-text-md tw-font-medium">Music visualization</h2>
+      <span class="tw-flex">
+        <q-icon name="fas fa-glasses" size="md" class="tw-mr-4" />
+        <h1 class="tw-text-2xl tw-font-medium">STATS FOR NERDS</h1>
+      </span>
+      <h2 class="tw-text-md tw-tracking-wider -tw-mt-4">MUSIC VISUALIZATION</h2>
+
+      <span class="-tw-mt-2"
+        ><q-icon name="fas fa-warning" /> Keeping this open may cause
+        performance issues.</span
+      >
 
       <div class="tw-mt-4"></div>
 
