@@ -9,7 +9,7 @@ export const useFakeTerminalAnimations = (
   term: ReturnType<typeof useFakeTerminal>,
   volume: ReturnType<typeof useAudioVolume>,
   music: ReturnType<typeof useMusic>,
-  refs: { showStatsForNerds: Ref<boolean> }
+  refs: { showStatsForNerds: Ref<boolean> },
 ) => {
   const termBusy = ref(false);
   const keyboardSFX = useKeyboardSFX(volume.context, volume.gainNode);
@@ -34,7 +34,7 @@ export const useFakeTerminalAnimations = (
     await term.wait(1250 / 2);
 
     await term.fillInLatestLinePerWord(
-      'Statistics ' + (refs.showStatsForNerds.value ? 'enabled' : 'disabled')
+      'Statistics ' + (refs.showStatsForNerds.value ? 'enabled' : 'disabled'),
     );
 
     await term.wait(1250 / 2);
@@ -118,13 +118,13 @@ export const useFakeTerminalAnimations = (
 
     await term.keyboardSFX.playFullVolume();
     await term.newOutputStringLine(
-      "Hey! My name's Benedict Jude A. Rocat -- but I often just go by Ben Jude."
+      "Hey! My name's Benedict Jude A. Rocat -- but I often just go by Ben Jude.",
     );
 
     await term.wait(500);
 
     await term.newOutputStringLine(
-      '🚀 I make cohesive software, visual & acoustic experiences.'
+      '🚀 I make cohesive software, visual & acoustic experiences.',
     );
 
     await term.wait(700);
@@ -133,7 +133,7 @@ export const useFakeTerminalAnimations = (
     await term.newOutputStringLine();
     await term.wait(250);
     await term.newOutputStringLine(
-      'My experience is varied, but mainly focused on the following:'
+      'My experience is varied, but mainly focused on the following:',
     );
 
     await term.wait(1250);
@@ -178,13 +178,13 @@ export const useFakeTerminalAnimations = (
     await term.wait(500);
 
     await term.newOutputStringLine(
-      'WARNING! This is a non-standard Linux configuration (faux_linux 5.3.1)'
+      'WARNING! This is a non-standard Linux configuration (faux_linux 5.3.1)',
     );
 
     await term.wait(300);
 
     await term.newOutputStringLine(
-      "DO NOT PROCEED UNLESS This is a scary warning message that's supposed to show up for just a moment!"
+      "DO NOT PROCEED UNLESS This is a scary warning message that's supposed to show up for just a moment!",
     );
 
     await term.wait(150);
@@ -206,7 +206,7 @@ export const useFakeTerminalAnimations = (
         (
           +c ^
           (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4)))
-        ).toString(16)
+        ).toString(16),
       );
     }
 
@@ -264,7 +264,6 @@ export const useFakeTerminalAnimations = (
 
     const fillInLine = async (text: string) => {
       const line = term.getLatestLine();
-      const content = line.content;
 
       for (let i = 0; i < text.length; i++) {
         if (termBusy.value) {
