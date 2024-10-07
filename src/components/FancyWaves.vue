@@ -1,0 +1,142 @@
+<template>
+  <TresCanvas
+    window-size
+    render-mode="manual"
+    class="tw-absolute tw-top-0 tw-bottom-0 tw-left-0 tw-right-0"
+  >
+    <!-- <OrbitControls /> -->
+    <ManualFPS />
+
+    <TresPerspectiveCamera :position="position" :rotation="[1.3, 0, 0]" />
+    <!-- <TresPerspectiveCamera /> -->
+    <primitive ref="glowMesh" :object="_glowMesh">
+      <TresShaderMaterial
+        :vertex-shader="glowMeshVertexShader"
+        :fragment-shader="glowMeshFragmentShader"
+        :uniforms="glowMeshUniforms"
+      />
+    </primitive>
+
+    <primitive ref="mesh" :object="_mesh">
+      <TresShaderMaterial
+        :uniforms="uniforms"
+        :vertex-shader="wavesVertexShader"
+        :fragment-shader="wavesFragmentShader"
+      />
+    </primitive>
+  </TresCanvas>
+</template>
+
+<script setup lang="ts">
+import { ref, shallowRef, computed, watch, PropType } from 'vue';
+import {
+  TresCanvas,
+  TresPrimitive,
+  useRenderLoop,
+  useTexture,
+} from '@tresjs/core';
+import * as THREE from 'three';
+import { OrbitControls } from '@tresjs/cientos';
+import ManualFPS from './ManualFPS.vue';
+
+import { Mesh, PlaneGeometry } from 'three';
+
+import wavesFragmentShader from 'src/components/FancyWaves/waves.frag';
+import wavesVertexShader from 'src/components/FancyWaves/waves.vert';
+
+import glowMeshFragmentShader from 'src/components/FancyWaves/glow.frag';
+import glowMeshVertexShader from 'src/components/FancyWaves/glow.vert';
+
+const { onLoop } = useRenderLoop();
+
+// ###### lights
+
+const glowGeometry = new PlaneGeometry(250, 75, 1, 1);
+const _glowMesh = new Mesh(glowGeometry);
+
+const glowMeshUniforms = shallowRef({
+  colors: {
+    value: [],
+  },
+  time: { value: 0 },
+});
+
+const glowMesh = shallowRef<TresPrimitive | null>(null);
+
+watch(glowMesh, (value) => {
+  if (!value) return;
+
+  value.rotation.x = 3.14 / 2;
+  value.position.y = 50;
+  value.position.z = -35;
+});
+
+// ### ###
+
+const geometry = new PlaneGeometry(30, 20, 125, 125);
+// const mat = new MeshBasicMaterial({ color: 0x444444, wireframe: true });
+const _mesh = new Mesh(geometry);
+
+const mesh = shallowRef<TresPrimitive | null>(null);
+
+const position = ref([0, -3, 2]);
+
+function updateScroll() {
+  requestAnimationFrame(updateScroll);
+
+  position.value = [0, -3, 2 + (3 - (window.scrollY / 2500) * 3)];
+}
+
+updateScroll();
+
+const props = defineProps({
+  speed: { type: Number, default: 1 },
+  noiseStrength: { type: Number, default: 1 },
+  colors: {
+    type: Array as PropType<{ r: number; g: number; b: number }[]>,
+    required: true,
+  },
+});
+
+onLoop(({ elapsed }) => {
+  if (!mesh.value) return;
+
+  if (!Number.isFinite(mesh.value.material.uniforms.time.value)) {
+    mesh.value.material.uniforms.time = { value: 0 };
+  }
+
+  if (!Number.isFinite(mesh.value.material.uniforms.noiseStrength.value)) {
+    mesh.value.material.uniforms.noiseStrength = { value: 1 };
+  }
+
+  const colorVectors = [];
+
+  for (let i = 0; i < props.colors.length; i++) {
+    const color = props.colors[i];
+
+    colorVectors.push(new THREE.Vector4(color.r, color.g, color.b, 1));
+  }
+
+  mesh.value.material.uniforms.colors.value = colorVectors;
+
+  mesh.value.material.uniforms.time.value += 0.005 * props.speed;
+  mesh.value.material.uniforms.noiseStrength.value = props.noiseStrength;
+
+  if (!glowMesh.value) return;
+
+  glowMesh.value.material.uniforms.time.value += 0.005 * props.speed;
+  glowMesh.value.material.uniforms.colors.value = colorVectors;
+});
+
+const uniforms = shallowRef({
+  time: { value: 0 },
+  noiseStrength: { value: 1 },
+  colors: { value: [] },
+});
+
+const vertexShader = ref(`
+`);
+
+const fragmentShader = ref(`
+`);
+</script>
