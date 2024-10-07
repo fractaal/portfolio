@@ -368,11 +368,11 @@ onMounted(async () => {
       img.src = url;
       await img.decode();
 
-      console.log(
-        `Image ${url} has aspect ratio of ${img.width / img.height} (${
-          img.width
-        }x${img.height})`,
-      );
+      // console.log(
+      //   `Image ${url} has aspect ratio of ${img.width / img.height} (${
+      //     img.width
+      //   }x${img.height})`,
+      // );
       return img.width / img.height;
     }),
   );
