@@ -7,6 +7,6 @@ onMounted(async () => {
   // await new Promise((resolve) => {
   //   setTimeout(resolve, 1000);
   // });
-  setInterval(advance, 1000 / 40);
+  setInterval(advance, 1000 / 60);
 });
 </script>
