@@ -49,7 +49,9 @@
     <div class="tw-absolute -tw-z-20">
       <Suspense>
         <FancyWaves
+          :colors="actualColors"
           :speed="wavesSpeed"
+          :bg-glow-color-rotation="music.realtime.bgGlowColorRotation"
           :noise-strength="noiseStrength"
           :glow1-opacity="glow1Opacity"
           :glow2-opacity="glow2Opacity"
@@ -189,23 +191,59 @@
               :loading="termAnims.termBusy.value"
               >Delete everything</q-btn
             >
+            <q-btn
+              flat
+              no-caps
+              class="tw-bg-white/5 tw-min-w-6"
+              @click="termAnims.toggleStatsForNerds"
+              :loading="termAnims.termBusy.value"
+              >Show stats for nerds</q-btn
+            >
           </div>
-          <!-- <pre class="tw-absolute -tw-bottom-12 tw-left-0 tw-p-8">
-        BEAT DEBUG INFO: {{ debugTDisplay }}</pre
-          > -->
-          <!-- <div>
-          <span class="tw-font-semibold tw-opacity-75"
-            >benjude@sys: $ uname -a</span
-          >
-        </div> -->
-          <!-- <br />
-        <div></div>
-        <div>
-          <span class="tw-font-semibold tw-opacity-75">benjude@sys: $ </span>
-          <span class="tw-font-semibold">{{ display }}</span>
-        </div> -->
         </div>
       </div>
+    </section>
+
+    <section
+      v-if="showStatsForNerds"
+      class="lg:tw-w-4/6 tw-mx-auto tw-ring-1 tw-ring-white/20 tw-mt-12 tw-font-mono tw-p-4 tw-rounded-xl tw-bg-black/80"
+    >
+      <h1 class="tw-text-2xl tw-font-black">STATS FOR NERDS_</h1>
+
+      <div class="tw-mt-4"></div>
+
+      <div class="tw-flex tw-flex-nowrap tw-gap-1">
+        <div
+          v-for="(beat, index) in music.beatMap.value"
+          :key="index"
+          class="tw-rounded-sm tw-h-8 tw-w-4"
+          :class="
+            currentBeatNumber === index
+              ? music.beatMap.value[currentBeatNumber]
+                ? 'tw-bg-green-500 tw-animate-ping'
+                : 'tw-bg-white'
+              : music.beatMap.value[index]
+              ? 'tw-bg-green-500/20'
+              : 'tw-bg-white/20'
+          "
+        ></div>
+      </div>
+
+      <div>Beat Index: {{ music.realtime.beatIndex }}</div>
+
+      <div>1/4th Beat Index: {{ music.realtime.oneFourthBeatIndex }}</div>
+
+      <div>
+        1/4th Beat Index Across Patterns:
+        {{ music.realtime.oneFourthBeatIndexAcrossPatterns }}
+      </div>
+
+      <div>
+        Pattern Index: {{ music.realtime.patternIndex + 1 }} /
+        {{ music.realtime.numPatterns }}
+      </div>
+
+      <div>Colors: {{ music.realtime.colors }}</div>
     </section>
 
     <section
@@ -381,6 +419,7 @@ import { useMusic } from 'src/assets/composables/useMusic';
 import { useFakeTerminalAnimations } from 'src/assets/composables/useFakeTerminalAnimations';
 import { useFakeTerminal } from 'src/assets/composables/useFakeTerminal';
 import { useRouter } from 'vue-router';
+import { LocalStorage } from 'quasar';
 import ProjectItem from 'src/components/ProjectItem.vue';
 import FancyWaves from 'src/components/FancyWaves.vue';
 import ProjectData from 'src/projects-data';
@@ -395,6 +434,7 @@ const router = useRouter();
 
 import { computed, ref, onMounted, watch } from 'vue';
 import useAudioVolume from 'src/assets/composables/useAudioVolume';
+import { SpringRGB } from 'src/assets/spring';
 
 const glow1Opacity = ref(1);
 const glow2Opacity = ref(1);
@@ -405,9 +445,27 @@ const blinkerOpacity = ref(100);
 
 const volume = useAudioVolume();
 
+const showStatsForNerds = ref(false);
+
+onMounted(() => {
+  if (LocalStorage.has('showStatsForNerds')) {
+    showStatsForNerds.value = true;
+  }
+});
+
+watch(showStatsForNerds, (value) => {
+  if (value) {
+    LocalStorage.set('showStatsForNerds', true);
+  } else {
+    LocalStorage.remove('showStatsForNerds');
+  }
+});
+
 const music = useMusic(volume.context, volume.gainNode);
 const term = useFakeTerminal(volume.context, volume.gainNode);
-const termAnims = useFakeTerminalAnimations(term, volume, music);
+const termAnims = useFakeTerminalAnimations(term, volume, music, {
+  showStatsForNerds,
+});
 
 let textUsed: string[] = [];
 
@@ -458,7 +516,7 @@ onMounted(async () => {
 
     textUsed.push(chosenText);
 
-    if (termBusy.value) {
+    if (termAnims.termBusy.value) {
       continue;
     }
 
@@ -478,15 +536,13 @@ function easeInOutExpo(x: number): number {
     : (2 - Math.pow(2, -20 * x + 10)) / 2;
 }
 
-const beatPeriod = 60 / (music.bpm.value * 4);
-
-// Define your beat map
-
-const totalBeats = music.beatMap.value.length;
+const currentBeatNumber = ref(0);
 
 function smoothHeartbeat(time: number) {
+  const beatPeriod = 60 / (music.bpm.value * 4);
   const beatNumber = Math.floor(time / beatPeriod);
-  const beatIndex = beatNumber % totalBeats;
+
+  currentBeatNumber.value = beatNumber % music.beatMap.value.length;
 
   // Time elapsed since the current beat
   const currentBeatTime = beatNumber * beatPeriod;
@@ -494,17 +550,11 @@ function smoothHeartbeat(time: number) {
 
   let out = 0;
 
-  if (music.beatMap.value[beatIndex]) {
+  if (music.hasBeatAtIndex(beatNumber)) {
     // Linearly decay from 1 to 0 over the beat period
 
     out = Math.pow(1 - timeSinceBeat / beatPeriod, 3);
   }
-
-  debugTDisplay.value = `${beatIndex + 1} (${
-    music.beatMap.value[beatIndex] ? 'ON' : 'OFF'
-  }) (${out.toFixed(2)}) (${time.toFixed(2)}) (${currentBeatTime.toFixed(
-    2
-  )}) (${timeSinceBeat.toFixed(2)})`;
 
   return out; // Inactive beat
 }
@@ -512,9 +562,6 @@ function smoothHeartbeat(time: number) {
 function stepped(t: number) {
   return t < 0.5 ? 0 : 1;
 }
-
-const debugTDisplay = ref('0');
-const debugTDisplay2 = ref(0);
 
 let multiplier = 1;
 let multiplierAcceleration = 0;
@@ -524,7 +571,45 @@ const recentMultipliers: number[] = [];
 const wavesSpeed = ref(1);
 const noiseStrength = ref(1);
 
+const actualColors = ref<{ r: number; g: number; b: number }[]>([
+  { r: 0, g: 0, b: 0 },
+  { r: 0, g: 0, b: 0 },
+  { r: 0, g: 0, b: 0 },
+  { r: 0, g: 0, b: 0 },
+  { r: 0, g: 0, b: 0 },
+]);
+
+function rgbToArray(rgb: { r: number; g: number; b: number }) {
+  return [rgb.r, rgb.g, rgb.b] as [number, number, number];
+}
+
+const color1Spring = new SpringRGB();
+const color2Spring = new SpringRGB();
+const color3Spring = new SpringRGB();
+const color4Spring = new SpringRGB();
+const color5Spring = new SpringRGB();
+
 setInterval(() => {
+  color1Spring.setTarget(music.realtime.colors[0]);
+  color2Spring.setTarget(music.realtime.colors[1]);
+  color3Spring.setTarget(music.realtime.colors[2]);
+  color4Spring.setTarget(music.realtime.colors[3]);
+  color5Spring.setTarget(music.realtime.colors[4]);
+
+  color1Spring.update(1 / 15);
+  color2Spring.update(1 / 15);
+  color3Spring.update(1 / 15);
+  color4Spring.update(1 / 15);
+  color5Spring.update(1 / 15);
+
+  actualColors.value = [
+    color1Spring.position,
+    color2Spring.position,
+    color3Spring.position,
+    color4Spring.position,
+    color5Spring.position,
+  ];
+
   let a = volume.muted.value ? 1 : 0;
   let twiceAsFastT =
     (music.getPlaybackTime() % (60 / (music.bpm.value * (2 / 3)))) /
@@ -535,8 +620,6 @@ setInterval(() => {
 
   const twiceAsFastFinalT =
     twiceAsFastT + (twiceAsFastFallbackT - twiceAsFastT) * easeInOutExpo(a);
-
-  debugTDisplay2.value = twiceAsFastFinalT;
 
   blinkerOpacity.value = stepped(twiceAsFastFinalT) * 100;
 
@@ -621,6 +704,14 @@ function openSoundCloud() {
   animation: fadeIn 1s cubic-bezier(0.19, 1, 0.22, 1) forwards;
   transform: translateZ(-1px);
 }
+
+/* @keyframes ping {
+  0%,
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+} */
 
 @keyframes fadeOut {
   from {
