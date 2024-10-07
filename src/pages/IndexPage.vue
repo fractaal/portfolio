@@ -52,6 +52,7 @@
           :colors="actualColors"
           :speed="wavesSpeed"
           :noise-strength="noiseStrength"
+          :brightness="brightness"
         />
       </Suspense>
     </div>
@@ -201,53 +202,86 @@
 
     <section
       v-if="showStatsForNerds"
-      class="lg:tw-w-4/6 tw-mx-auto tw-ring-1 tw-ring-white/20 tw-mt-12 tw-font-mono tw-p-4 tw-rounded-xl tw-bg-black/80"
+      class="lg:tw-w-4/6 tw-mx-auto tw-ring-1 tw-ring-white/20 tw-mt-12 tw-font-mono tw-p-4 tw-rounded-xl tw-bg-black/80 tw-flex tw-flex-col"
     >
-      <h1 class="tw-text-2xl tw-font-black">STATS FOR NERDS_</h1>
+      <h1 class="tw-text-2xl tw-font-black">Stats for nerds</h1>
+      <h2 class="tw-text-md tw-font-medium">Music visualization</h2>
 
       <div class="tw-mt-4"></div>
 
-      <div class="tw-flex tw-flex-nowrap tw-gap-1">
+      <div>Pattern Display</div>
+
+      <div class="tw-flex tw-gap-1">
         <div
           v-for="(_, index) in music.beatMap.value"
           :key="index"
-          class="tw-rounded-sm tw-h-8 tw-w-4"
+          class="tw-relative tw-rounded-sm tw-h-8 tw-w-4"
           :class="
             currentBeatNumber === index
               ? music.beatMap.value[currentBeatNumber]
-                ? 'tw-bg-green-500 tw-animate-ping'
-                : 'tw-bg-white'
+                ? 'tw-bg-purple-400'
+                : 'tw-bg-purple-700'
               : music.beatMap.value[index]
-                ? 'tw-bg-green-500/20'
-                : 'tw-bg-white/20'
+                ? 'tw-bg-white/25'
+                : 'tw-bg-white/5'
           "
-        ></div>
+        >
+          <div
+            class="tw-absolute tw-top-0 tw-left-0 tw-right-0 tw-bottom-0 tw-rounded-sm"
+            :class="
+              currentBeatNumber === index
+                ? music.beatMap.value[currentBeatNumber]
+                  ? 'tw-bg-purple-400 tw-animate-ping'
+                  : 'tw-bg-purple-700'
+                : music.beatMap.value[index]
+                  ? 'tw-bg-white/25'
+                  : 'tw-bg-white/5'
+            "
+          ></div>
+        </div>
       </div>
 
-      <div>Beat Index: {{ music.realtime.beatIndex }}</div>
+      <span class="tw-min-h-8"></span>
 
-      <div>1/4th Beat Index: {{ music.realtime.oneFourthBeatIndex }}</div>
-
-      <div>
-        1/4th Beat Index Across Patterns:
-        {{ music.realtime.oneFourthBeatIndexAcrossPatterns }}
-      </div>
-
-      <div>
-        Pattern Index: {{ music.realtime.patternIndex + 1 }} /
-        {{ music.realtime.numPatterns }}
-      </div>
-
-      <div>Colors: {{ music.realtime.colors }}</div>
-
-      <div>
-        Wave Speed Multiplier: {{ music.realtime.speedMult }} - Display
-        {{ speedMultSpring.position }}
-      </div>
-
-      <div>
-        Noise Strength: {{ music.realtime.noiseStrength }} - Display
-        {{ noiseStrengthSpring.position }}
+      <div class="tw-flex tw-flex-col lg:tw-flex-row tw-justify-start tw-gap-8">
+        <div class="tw-flex-col">
+          <b>--- Beat ---</b>
+          <div>Beat Index: {{ music.realtime.beatIndex }}</div>
+          <div>1/4th Beat Index: {{ music.realtime.oneFourthBeatIndex }}</div>
+          <div>
+            1/4th Beat Index In Pattern:
+            {{ music.realtime.oneFourthBeatIndexInPattern }}
+          </div>
+          <div>
+            Pattern Index: {{ music.realtime.patternIndex + 1 }} /
+            {{ music.realtime.numPatterns }}
+          </div>
+        </div>
+        <div class="tw-flex-col">
+          <b>--- Colors ---</b>
+          <div class="tw-flex tw-gap-1">
+            <div
+              v-for="color in music.realtime.colors"
+              :key="color.r + color.g + color.b"
+            >
+              <ColorDisplay :color="color" />
+            </div>
+          </div>
+        </div>
+        <div class="tw-flex-col">
+          <b>--- Springs ---</b>
+          <div>
+            Wave Speed Multiplier: {{ music.realtime.speedMult }} - Display
+            {{ speedMultSpring.position }}
+          </div>
+          <div>
+            Noise Strength: {{ music.realtime.noiseStrength }} - Display
+            {{ noiseStrengthSpring.position }}
+          </div>
+          <div>Beat Spring: {{ beatSpring.position }}</div>
+          <div>Brightness Spring: {{ brightnessSpring.position }}</div>
+          <div>Slow Brightness Spring: {{ slowBrightnessSpring.position }}</div>
+        </div>
       </div>
     </section>
 
@@ -426,6 +460,7 @@ import { useFakeTerminal } from 'src/assets/composables/useFakeTerminal';
 import { LocalStorage } from 'quasar';
 import ProjectItem from 'src/components/ProjectItem.vue';
 import FancyWaves from 'src/components/FancyWaves.vue';
+import ColorDisplay from 'src/components/ColorDisplay.vue';
 import ProjectData from 'src/projects-data';
 
 const numProjects = ProjectData.length;
@@ -437,11 +472,6 @@ const hideEverything = ref(false);
 import { ref, onMounted, watch } from 'vue';
 import useAudioVolume from 'src/assets/composables/useAudioVolume';
 import { SpringRGB, Spring } from 'src/assets/spring';
-
-const glow1Opacity = ref(1);
-const glow2Opacity = ref(1);
-const glow3Opacity = ref(1);
-const glow4Opacity = ref(1);
 
 const blinkerOpacity = ref(100);
 
@@ -528,48 +558,7 @@ onMounted(async () => {
   }
 });
 
-function easeInOutExpo(x: number): number {
-  return x === 0
-    ? 0
-    : x === 1
-      ? 1
-      : x < 0.5
-        ? Math.pow(2, 20 * x - 10) / 2
-        : (2 - Math.pow(2, -20 * x + 10)) / 2;
-}
-
 const currentBeatNumber = ref(0);
-
-function smoothHeartbeat(time: number) {
-  const beatPeriod = 60 / (music.bpm.value * 4);
-  const beatNumber = Math.floor(time / beatPeriod);
-
-  currentBeatNumber.value = beatNumber % music.beatMap.value.length;
-
-  // Time elapsed since the current beat
-  const currentBeatTime = beatNumber * beatPeriod;
-  const timeSinceBeat = time - currentBeatTime;
-
-  let out = 0;
-
-  if (music.hasBeatAtIndex(beatNumber)) {
-    // Linearly decay from 1 to 0 over the beat period
-
-    out = Math.pow(1 - timeSinceBeat / beatPeriod, 3);
-  }
-
-  return out; // Inactive beat
-}
-
-function stepped(t: number) {
-  return t < 0.5 ? 0 : 1;
-}
-
-let multiplier = 1;
-let multiplierAcceleration = 0;
-
-const recentMultipliers: number[] = [];
-
 const wavesSpeed = ref(1);
 const noiseStrength = ref(1);
 
@@ -590,8 +579,17 @@ const color5Spring = new SpringRGB();
 const speedMultSpring = new Spring(25, 10, 1);
 const noiseStrengthSpring = new Spring(25, 10, 1);
 
+const beatSpring = new Spring(50, 20, 5);
+
+const brightnessSpring = new Spring(100, 20, 1);
+const slowBrightnessSpring = new Spring(10, 10, 1);
+
+let brightness = 1;
+
 setInterval(
   () => {
+    currentBeatNumber.value = music.realtime.oneFourthBeatIndexInPattern;
+
     color1Spring.setTarget(music.realtime.colors[0]);
     color2Spring.setTarget(music.realtime.colors[1]);
     color3Spring.setTarget(music.realtime.colors[2]);
@@ -606,6 +604,25 @@ setInterval(
       noiseStrengthSpring.setTarget(music.realtime.noiseStrength);
     }
 
+    if (
+      music.hasBeatAtIndex(music.realtime.oneFourthBeatIndexInPattern) &&
+      !volume.muted.value
+    ) {
+      beatSpring.reset(0.9);
+      slowBrightnessSpring.setTarget(1.17);
+      brightnessSpring.setTarget(1.17);
+    } else {
+      beatSpring.setTarget(0);
+
+      if (volume.muted.value) {
+        slowBrightnessSpring.setTarget(0.85);
+        brightnessSpring.setTarget(0.85);
+      } else {
+        slowBrightnessSpring.setTarget(1);
+        brightnessSpring.setTarget(1);
+      }
+    }
+
     color1Spring.update(1 / 30);
     color2Spring.update(1 / 30);
     color3Spring.update(1 / 30);
@@ -614,6 +631,9 @@ setInterval(
 
     speedMultSpring.update(1 / 30);
     noiseStrengthSpring.update(1 / 30);
+    beatSpring.update(1 / 30);
+    brightnessSpring.update(1 / 30);
+    slowBrightnessSpring.update(1 / 30);
 
     actualColors.value = [
       color1Spring.position,
@@ -623,67 +643,16 @@ setInterval(
       color5Spring.position,
     ];
 
-    let a = volume.muted.value ? 1 : 0;
-    let twiceAsFastT =
-      (music.getPlaybackTime() % (60 / (music.bpm.value * (2 / 3)))) /
-      (60 / (music.bpm.value * (2 / 3)));
-
-    let twiceAsFastFallbackT = (performance.now() % 2000) / 2000;
-
-    const twiceAsFastFinalT =
-      twiceAsFastT + (twiceAsFastFallbackT - twiceAsFastT) * easeInOutExpo(a);
-
-    blinkerOpacity.value = stepped(twiceAsFastFinalT) * 100;
-
-    const timeMs = performance.now();
-
-    // multiplier = 0.5 + smoothHeartbeat(getPlaybackTime()) * 0.5;
-
-    // multiplier gradually accelerates to 0
-
-    multiplierAcceleration += 0.0025;
-
-    multiplier -= multiplierAcceleration;
-
-    let newMultiplier = 0.75 + smoothHeartbeat(music.getPlaybackTime()) * 0.25;
-
-    if (multiplier < newMultiplier) {
-      multiplier = newMultiplier;
-      multiplierAcceleration = 0;
+    if (volume.muted.value) {
+      brightness = slowBrightnessSpring.position;
+    } else {
+      brightness = brightnessSpring.position;
     }
 
-    multiplier = Math.max(0.75, multiplier);
-
-    recentMultipliers.unshift(multiplier);
-    recentMultipliers.length = 5;
-
-    let sum = 0;
-    for (let i = 0; i < recentMultipliers.length; i++) {
-      sum += recentMultipliers[i];
-    }
-
-    const actualMultiplier = Math.pow(sum / recentMultipliers.length, 3);
-    const fallbackMultiplierWhenMuted = 0.75;
-
-    const finalMultiplier =
-      a * fallbackMultiplierWhenMuted + (1 - a) * actualMultiplier;
-
-    wavesSpeed.value = 0.5 + Math.pow(actualMultiplier, 5) * 2;
-    noiseStrength.value = 1 + Math.pow(actualMultiplier, 5) * 0.25;
-
-    wavesSpeed.value = a * 0.5 + (1 - a) * wavesSpeed.value;
-    noiseStrength.value = a * 1 + (1 - a) * noiseStrength.value;
-
-    wavesSpeed.value = wavesSpeed.value * speedMultSpring.position;
-    noiseStrength.value = noiseStrength.value * noiseStrengthSpring.position;
-
-    glow1Opacity.value = (Math.sin(timeMs / 1000) / 2 + 0.5) * finalMultiplier;
-    glow2Opacity.value =
-      (Math.sin(timeMs / 1000 + Math.PI / 2) / 2 + 0.5) * finalMultiplier;
-    glow3Opacity.value =
-      (Math.sin(timeMs / 1000 + Math.PI) / 2 + 0.5) * finalMultiplier;
-    glow4Opacity.value =
-      (Math.sin(timeMs / 1000 + (3 * Math.PI) / 2) / 2 + 0.5) * finalMultiplier;
+    wavesSpeed.value =
+      (0.5 + Math.pow(beatSpring.position, 5)) * speedMultSpring.position;
+    noiseStrength.value =
+      (1 + beatSpring.position, 5 * 0.25) * noiseStrengthSpring.position;
   },
   (1 / 30) * 1000,
 );
