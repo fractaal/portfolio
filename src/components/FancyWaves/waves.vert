@@ -2,13 +2,9 @@ varying vec4 vColor;
 varying vec2 vUv;
 uniform float time;
 uniform float noiseStrength;
-
 uniform vec4 colors[5];
-uniform mat4 modelViewMatrix;
-uniform mat4 projectionMatrix;
 
-attribute vec3 position;
-attribute vec2 uv;
+
 
 //
 // Description : Array and textureless GLSL 2D/3D/4D simplex
