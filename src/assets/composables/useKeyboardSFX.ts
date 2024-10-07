@@ -48,7 +48,7 @@ export const useKeyboardSFX = (context: AudioContext, out: AudioNode) => {
     }
 
     try {
-      gainNode.gain.setValueAtTime(0.2, context.currentTime);
+      gainNode.gain.setValueAtTime(0.1, context.currentTime);
       const selectedBuffer =
         buffers[Math.floor(Math.random() * buffers.length)];
 
@@ -66,6 +66,7 @@ export const useKeyboardSFX = (context: AudioContext, out: AudioNode) => {
 
     try {
       const selectedBuffer = buffers[0];
+      gainNode.gain.setValueAtTime(0.2, context.currentTime);
 
       const source = context.createBufferSource();
       source.buffer = selectedBuffer;
