@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, Ref } from 'vue';
 import useAudioVolume from './useAudioVolume';
 import { useKeyboardSFX } from './useKeyboardSFX';
 import { useFakeTerminal } from './useFakeTerminal';
@@ -8,11 +8,41 @@ import { useRouter } from 'vue-router';
 export const useFakeTerminalAnimations = (
   term: ReturnType<typeof useFakeTerminal>,
   volume: ReturnType<typeof useAudioVolume>,
-  music: ReturnType<typeof useMusic>
+  music: ReturnType<typeof useMusic>,
+  refs: { showStatsForNerds: Ref<boolean> }
 ) => {
   const termBusy = ref(false);
   const keyboardSFX = useKeyboardSFX(volume.context, volume.gainNode);
   const router = useRouter();
+
+  async function toggleStatsForNerds() {
+    termBusy.value = true;
+
+    if (!term.isLatestLinePrompt()) {
+      term.newPromptStringLine();
+    }
+
+    await term.wipeOutLatestLine();
+
+    await term.fillInLatestLine('dmesg');
+
+    await term.keyboardSFX.playFullVolume();
+    await term.newOutputStringLine();
+
+    refs.showStatsForNerds.value = !refs.showStatsForNerds.value;
+
+    await term.wait(1250 / 2);
+
+    await term.fillInLatestLinePerWord(
+      'Statistics ' + (refs.showStatsForNerds.value ? 'enabled' : 'disabled')
+    );
+
+    await term.wait(1250 / 2);
+
+    await term.newPromptStringLine();
+
+    termBusy.value = false;
+  }
 
   async function toggleMusicTerm() {
     termBusy.value = true;
@@ -289,6 +319,7 @@ export const useFakeTerminalAnimations = (
   }
 
   return {
+    toggleStatsForNerds,
     toggleMusicTerm,
     clearCommand,
     whoAreYouCommand,
