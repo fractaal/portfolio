@@ -51,7 +51,15 @@ import glowMeshVertexShader from 'src/components/FancyWaves/glow.vert';
 
 const { onLoop } = useRenderLoop();
 
-// ###### lights
+const props = defineProps({
+  speed: { type: Number, default: 1, required: true },
+  noiseStrength: { type: Number, default: 1, required: true },
+  colors: {
+    type: Array as PropType<{ r: number; g: number; b: number }[]>,
+    required: true,
+  },
+  brightness: { type: Number, default: 1, required: true },
+});
 
 const glowGeometry = new PlaneGeometry(250, 75, 1, 1);
 const _glowMesh = new Mesh(glowGeometry);
@@ -67,6 +75,7 @@ const glowMeshUniforms = shallowRef({
     ],
   },
   time: { value: 0 },
+  brightness: { value: props.brightness },
 });
 
 const glowMesh = shallowRef<TresPrimitive | null>(null);
@@ -74,7 +83,7 @@ const showGlowMesh = ref(false);
 
 // ### ###
 
-const geometry = new PlaneGeometry(30, 20, 125, 125);
+const geometry = new PlaneGeometry(30, 20, 150, 150);
 // const mat = new MeshBasicMaterial({ color: 0x444444, wireframe: true });
 const _mesh = new Mesh(geometry);
 
@@ -89,15 +98,6 @@ function updateScroll() {
 }
 
 updateScroll();
-
-const props = defineProps({
-  speed: { type: Number, default: 1, required: true },
-  noiseStrength: { type: Number, default: 1, required: true },
-  colors: {
-    type: Array as PropType<{ r: number; g: number; b: number }[]>,
-    required: true,
-  },
-});
 
 onMounted(() => {
   setTimeout(() => {
@@ -131,11 +131,13 @@ onLoop(() => {
 
   mesh.value.material.uniforms.time.value += 0.005 * props.speed;
   mesh.value.material.uniforms.noiseStrength.value = props.noiseStrength;
+  mesh.value.material.uniforms.brightness.value = props.brightness;
 
   if (!glowMesh.value) return;
 
   glowMesh.value.material.uniforms.time.value += 0.005 * props.speed;
   glowMesh.value.material.uniforms.colors.value = colorVectors;
+  glowMesh.value.material.uniforms.brightness.value = props.brightness;
 });
 
 const uniforms = shallowRef({
@@ -150,5 +152,6 @@ const uniforms = shallowRef({
       [1, 1, 1],
     ],
   },
+  brightness: { value: props.brightness },
 });
 </script>

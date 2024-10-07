@@ -1,5 +1,6 @@
 precision mediump float;
 uniform float time;
+uniform float brightness;
 
 varying vec4 vColors[5];
 varying vec2 vUv;
@@ -126,5 +127,5 @@ void main() {
   }
 
   // Output the final blended color
-  gl_FragColor = color;
+  gl_FragColor = color * brightness;
 }

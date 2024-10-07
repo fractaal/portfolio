@@ -3,6 +3,7 @@ varying vec2 vUv;
 uniform float time;
 uniform float noiseStrength;
 uniform vec4 colors[5];
+uniform float brightness;
 
 
 
@@ -111,7 +112,7 @@ void main() {
 
   float tilt = -0.8 * uv.y;
 
-  float noise = snoise(vec3(uv.x * 4.0 + time * 0.2, uv.y * 8.0, time * 0.2)) * 7.0;
+  float noise = snoise(vec3(uv.x * 2.75 + time * 0.2, uv.y * 8.0, time * 0.2)) * 7.0;
 
   noise = noise * noiseStrength;
 
@@ -136,7 +137,7 @@ void main() {
     vColor = mix(vColor, colors[i], noise);
 
     vec4 _ = vColor;
-    vColor = mix(vColor, vec4(2.0 / 255.0, 2.0 / 255.0, 15.0 / 255.0, 1.0), map(pos.z, -1.0, 1.0, 0.2, 1.5));
+    vColor = mix(vColor, vec4(2.0 / 255.0, 2.0 / 255.0, 15.0 / 255.0, 1.0), map(pos.z, -1.0, 1.0, 0.2, 1.5)) * brightness;
     // vColor = mix(vColor, vec4(1.0,1.0,1.0,1.0), pos.z * 0.001);
   }
 
