@@ -1,3 +1,4 @@
+import { LocalStorage } from 'quasar';
 import { PlaybackPositionNode } from 'src/classes/PlaybackPositionNode';
 import { reactive, ref } from 'vue';
 
@@ -53,40 +54,40 @@ const houseBeatMap = [null, null].flatMap(() => [
   false,
 ]);
 
-const simsBeatMap = [
-  true,
-  false, // 2
-  false,
-  false, // 4
-  false,
-  false, // 6
-  true,
-  false, // 8
-  false,
-  false, // 10
-  false,
-  false, // 12
-  false,
-  false, // 14
-  false,
-  false, // 16
-  false,
-  false, // 18
-  true,
-  false, // 20
-  false,
-  false, // 22
-  true,
-  false, // 24
-  false,
-  false, // 26
-  false,
-  false, // 28
-  false,
-  false,
-  false,
-  false,
-];
+// const simsBeatMap = [
+//   true,
+//   false, // 2
+//   false,
+//   false, // 4
+//   false,
+//   false, // 6
+//   true,
+//   false, // 8
+//   false,
+//   false, // 10
+//   false,
+//   false, // 12
+//   false,
+//   false, // 14
+//   false,
+//   false, // 16
+//   false,
+//   false, // 18
+//   true,
+//   false, // 20
+//   false,
+//   false, // 22
+//   true,
+//   false, // 24
+//   false,
+//   false, // 26
+//   false,
+//   false, // 28
+//   false,
+//   false,
+//   false,
+//   false,
+// ];
 
 const music = [
   {
@@ -104,6 +105,7 @@ const music = [
           { r: 0.765, g: 0.49, b: 0.733 },
         ],
         speedMult: 2,
+        noiseStrength: 1,
       },
       {
         beatMap: ogCompBeatmap,
@@ -115,68 +117,69 @@ const music = [
           { r: 137 / 255, g: 210 / 255, b: 220 / 255 },
         ],
         speedMult: 1,
+        noiseStrength: 1,
       },
     ],
   },
-  {
-    file: '/sims.flac',
-    bpm: 148,
-    patterns: [
-      {
-        beatMap: repeat(simsBeatMap, 4),
-        colors: [
-          { r: 0.416, g: 0.357, b: 0.988 },
-          { r: 0.976, g: 0.502, b: 0.384 },
-          { r: 0.827, g: 0.412, b: 0.867 },
-          { r: 0.443, g: 0.349, b: 0.98 },
-          { r: 0.765, g: 0.49, b: 0.733 },
-        ],
-        speedMult: 1,
-      },
-      {
-        beatMap: repeat(simsBeatMap, 4),
-        colors: [
-          { r: 137 / 255, g: 210 / 255, b: 220 / 255 },
-          { r: 101 / 255, g: 100 / 255, b: 219 / 255 },
-          { r: 35 / 255, g: 46 / 255, b: 209 / 255 },
-          { r: 16 / 255, g: 29 / 255, b: 66 / 255 },
-          { r: 137 / 255, g: 210 / 255, b: 220 / 255 },
-        ],
-        speedMult: 2,
-      },
-    ],
-    title: 'The Sims Neighborhood Themes Remix',
-  },
-  {
-    file: '/music-house.flac',
-    bpm: 105,
-    title: '',
-    patterns: [
-      {
-        beatMap: repeat(houseBeatMap, 4),
-        colors: [
-          { r: 0.416, g: 0.357, b: 0.988 },
-          { r: 0.976, g: 0.502, b: 0.384 },
-          { r: 0.827, g: 0.412, b: 0.867 },
-          { r: 0.443, g: 0.349, b: 0.98 },
-          { r: 0.765, g: 0.49, b: 0.733 },
-        ],
-        speedMult: 1.5,
-      },
-      {
-        beatMap: repeat(houseBeatMap, 4),
-        colors: [
-          { r: 137 / 255, g: 210 / 255, b: 220 / 255 },
-          { r: 101 / 255, g: 100 / 255, b: 219 / 255 },
-          { r: 35 / 255, g: 46 / 255, b: 209 / 255 },
-          { r: 16 / 255, g: 29 / 255, b: 66 / 255 },
-          { r: 137 / 255, g: 210 / 255, b: 220 / 255 },
-        ],
-        speedMult: 1.5,
-        noiseStrength: 1.25,
-      },
-    ],
-  },
+  // {
+  //   file: '/sims.flac',
+  //   bpm: 148,
+  //   patterns: [
+  //     {
+  //       beatMap: repeat(simsBeatMap, 4),
+  //       colors: [
+  //         { r: 0.416, g: 0.357, b: 0.988 },
+  //         { r: 0.976, g: 0.502, b: 0.384 },
+  //         { r: 0.827, g: 0.412, b: 0.867 },
+  //         { r: 0.443, g: 0.349, b: 0.98 },
+  //         { r: 0.765, g: 0.49, b: 0.733 },
+  //       ],
+  //       speedMult: 1,
+  //     },
+  //     {
+  //       beatMap: repeat(simsBeatMap, 4),
+  //       colors: [
+  //         { r: 137 / 255, g: 210 / 255, b: 220 / 255 },
+  //         { r: 101 / 255, g: 100 / 255, b: 219 / 255 },
+  //         { r: 35 / 255, g: 46 / 255, b: 209 / 255 },
+  //         { r: 16 / 255, g: 29 / 255, b: 66 / 255 },
+  //         { r: 137 / 255, g: 210 / 255, b: 220 / 255 },
+  //       ],
+  //       speedMult: 2,
+  //     },
+  //   ],
+  //   title: 'The Sims Neighborhood Themes Remix',
+  // },
+  // {
+  //   file: '/music-house.flac',
+  //   bpm: 105,
+  //   title: '',
+  //   patterns: [
+  //     {
+  //       beatMap: repeat(houseBeatMap, 4),
+  //       colors: [
+  //         { r: 0.416, g: 0.357, b: 0.988 },
+  //         { r: 0.976, g: 0.502, b: 0.384 },
+  //         { r: 0.827, g: 0.412, b: 0.867 },
+  //         { r: 0.443, g: 0.349, b: 0.98 },
+  //         { r: 0.765, g: 0.49, b: 0.733 },
+  //       ],
+  //       speedMult: 1.5,
+  //     },
+  //     {
+  //       beatMap: repeat(houseBeatMap, 4),
+  //       colors: [
+  //         { r: 137 / 255, g: 210 / 255, b: 220 / 255 },
+  //         { r: 101 / 255, g: 100 / 255, b: 219 / 255 },
+  //         { r: 35 / 255, g: 46 / 255, b: 209 / 255 },
+  //         { r: 16 / 255, g: 29 / 255, b: 66 / 255 },
+  //         { r: 137 / 255, g: 210 / 255, b: 220 / 255 },
+  //       ],
+  //       speedMult: 1.5,
+  //       noiseStrength: 1.25,
+  //     },
+  //   ],
+  // },
   {
     file: '/music-house-2.flac',
     bpm: 120,
@@ -210,7 +213,20 @@ const music = [
   },
 ];
 
+const lastMusicChoice = LocalStorage.getItem('lastMusicChoice') as string;
+
+if (lastMusicChoice) {
+  const index = music.findIndex((m) => m.title === lastMusicChoice);
+
+  // Remove the last choice from the list of choices
+  if (index !== -1) {
+    music.splice(index, 1);
+  }
+}
+
 const choiceIndex = Math.floor(Math.random() * music.length);
+
+LocalStorage.set('lastMusicChoice', music[choiceIndex].title);
 
 const maxVolume = 0.3;
 
