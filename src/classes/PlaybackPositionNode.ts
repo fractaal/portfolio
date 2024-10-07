@@ -51,7 +51,7 @@ export class PlaybackPositionNode {
     for (let index = 0; index < audioBuffer.numberOfChannels; index++) {
       this._bufferSource.buffer.copyToChannel(
         audioBuffer.getChannelData(index),
-        index
+        index,
       );
     }
 
@@ -65,7 +65,7 @@ export class PlaybackPositionNode {
     }
     this._bufferSource.buffer.copyToChannel(
       timeDataArray,
-      audioBuffer.numberOfChannels
+      audioBuffer.numberOfChannels,
     );
 
     // split the channels
@@ -81,7 +81,7 @@ export class PlaybackPositionNode {
     this._splitter.connect(this._analyser, audioBuffer.numberOfChannels);
   }
 
-  get buffer() {
+  get buffer(): AudioBuffer | null {
     return this._bufferSource.buffer;
   }
 
@@ -99,14 +99,17 @@ export class PlaybackPositionNode {
     return this._bufferSource.playbackRate;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   start(...args: any[]) {
     this._bufferSource.start(...args);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   stop(...args: any[]) {
     this._bufferSource.stop(...args);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   connect(...args: any[]) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore

@@ -182,8 +182,6 @@ const music = [
 
 const choiceIndex = Math.floor(Math.random() * music.length);
 
-const initialized = false;
-
 const maxVolume = 0.3;
 
 export const useMusic = (context: AudioContext, out: AudioNode) => {
@@ -274,7 +272,7 @@ export const useMusic = (context: AudioContext, out: AudioNode) => {
   function update() {
     const oneFourthBeatPeriod = 60 / bpm.value / 4;
     realtime.oneFourthBeatIndex = Math.floor(
-      getPlaybackTime() / oneFourthBeatPeriod
+      getPlaybackTime() / oneFourthBeatPeriod,
     );
 
     const beatPeriod = 60 / bpm.value;
@@ -282,7 +280,7 @@ export const useMusic = (context: AudioContext, out: AudioNode) => {
 
     const totalFourthBeats = music[choiceIndex].patterns.reduce(
       (acc, pattern) => acc + pattern.beatMap.length,
-      0
+      0,
     );
 
     let oneFourthBeatIndexAcrossPatterns =

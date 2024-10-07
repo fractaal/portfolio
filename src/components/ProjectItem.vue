@@ -121,7 +121,7 @@
       >
         <div class="tw-w-full tw-flex tw-justify-center tw-mb-6 tw-gap-3">
           <div
-            v-for="(image, index) in images"
+            v-for="(_, index) in images"
             :key="index"
             v-ripple
             :class="
@@ -245,7 +245,7 @@
 
         <div class="tw-w-full tw-flex tw-justify-center tw-gap-3 tw-my-8">
           <div
-            v-for="(image, index) in images"
+            v-for="(_, index) in images"
             :key="index"
             v-ripple
             :class="
@@ -304,7 +304,7 @@ setInterval(() => {
 const showDetails = ref(false);
 const chevronClass = computed(() => (showDetails.value ? 'upside-down' : ''));
 
-const detailsClass = computed(() => (showDetails.value ? 'tw-h-96' : 'tw-h-0'));
+// const detailsClass = computed(() => (showDetails.value ? 'tw-h-96' : 'tw-h-0'));
 
 const activeImage = ref(0);
 
@@ -333,7 +333,7 @@ watch(showDetails, (val) => {
     autoChange.value = false;
 
     const videoImageIndex = images.value.findIndex((url) =>
-      url.includes('.mp4')
+      url.includes('.mp4'),
     );
 
     if (videoImageIndex !== -1) {
@@ -346,7 +346,7 @@ watch(showDetails, (val) => {
 });
 
 const projectHasVideo = computed(() =>
-  project?.images.some((url) => url.includes('.mp4'))
+  project?.images.some((url) => url.includes('.mp4')),
 );
 
 const activeImageURL = computed(() => images.value[activeImage.value]);
@@ -371,10 +371,10 @@ onMounted(async () => {
       console.log(
         `Image ${url} has aspect ratio of ${img.width / img.height} (${
           img.width
-        }x${img.height})`
+        }x${img.height})`,
       );
       return img.width / img.height;
-    })
+    }),
   );
 
   allImagesLoaded.value = true;
@@ -384,7 +384,7 @@ onMounted(async () => {
   //   lowestAspectRatio.value + lowestAspectRatio.value * (1 / 6);
 
   await new Promise((resolve) =>
-    setTimeout(resolve, Math.round(Math.random() * 5) * 1000)
+    setTimeout(resolve, Math.round(Math.random() * 5) * 1000),
   );
 
   setInterval(() => {

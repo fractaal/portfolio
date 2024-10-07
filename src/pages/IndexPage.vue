@@ -214,7 +214,7 @@
 
       <div class="tw-flex tw-flex-nowrap tw-gap-1">
         <div
-          v-for="(beat, index) in music.beatMap.value"
+          v-for="(_, index) in music.beatMap.value"
           :key="index"
           class="tw-rounded-sm tw-h-8 tw-w-4"
           :class="
@@ -223,8 +223,8 @@
                 ? 'tw-bg-green-500 tw-animate-ping'
                 : 'tw-bg-white'
               : music.beatMap.value[index]
-              ? 'tw-bg-green-500/20'
-              : 'tw-bg-white/20'
+                ? 'tw-bg-green-500/20'
+                : 'tw-bg-white/20'
           "
         ></div>
       </div>
@@ -418,7 +418,6 @@ import { useScroll } from '@vueuse/core';
 import { useMusic } from 'src/assets/composables/useMusic';
 import { useFakeTerminalAnimations } from 'src/assets/composables/useFakeTerminalAnimations';
 import { useFakeTerminal } from 'src/assets/composables/useFakeTerminal';
-import { useRouter } from 'vue-router';
 import { LocalStorage } from 'quasar';
 import ProjectItem from 'src/components/ProjectItem.vue';
 import FancyWaves from 'src/components/FancyWaves.vue';
@@ -430,9 +429,7 @@ const projectDataColumn2 = ProjectData.slice(Math.ceil(numProjects / 2));
 
 const hideEverything = ref(false);
 
-const router = useRouter();
-
-import { computed, ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import useAudioVolume from 'src/assets/composables/useAudioVolume';
 import { SpringRGB } from 'src/assets/spring';
 
@@ -521,7 +518,7 @@ onMounted(async () => {
     }
 
     await termAnims.temporarilyChangeText(
-      texts[Math.floor(Math.random() * texts.length)]
+      texts[Math.floor(Math.random() * texts.length)],
     );
   }
 });
@@ -530,10 +527,10 @@ function easeInOutExpo(x: number): number {
   return x === 0
     ? 0
     : x === 1
-    ? 1
-    : x < 0.5
-    ? Math.pow(2, 20 * x - 10) / 2
-    : (2 - Math.pow(2, -20 * x + 10)) / 2;
+      ? 1
+      : x < 0.5
+        ? Math.pow(2, 20 * x - 10) / 2
+        : (2 - Math.pow(2, -20 * x + 10)) / 2;
 }
 
 const currentBeatNumber = ref(0);
@@ -579,10 +576,6 @@ const actualColors = ref<{ r: number; g: number; b: number }[]>([
   { r: 0, g: 0, b: 0 },
 ]);
 
-function rgbToArray(rgb: { r: number; g: number; b: number }) {
-  return [rgb.r, rgb.g, rgb.b] as [number, number, number];
-}
-
 const color1Spring = new SpringRGB();
 const color2Spring = new SpringRGB();
 const color3Spring = new SpringRGB();
@@ -616,7 +609,6 @@ setInterval(() => {
     (60 / (music.bpm.value * (2 / 3)));
 
   let twiceAsFastFallbackT = (performance.now() % 2000) / 2000;
-  let fallbackT = (performance.now() % 4000) / 4000;
 
   const twiceAsFastFinalT =
     twiceAsFastT + (twiceAsFastFallbackT - twiceAsFastT) * easeInOutExpo(a);
