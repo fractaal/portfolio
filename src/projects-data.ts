@@ -246,4 +246,27 @@ export default [
 
     images: ['/endeavor/1.png', '/endeavor/endeavor.mp4'],
   },
+  // {
+  //   name: 'Wherenau - PUV Tracking Application',
+  //   images: ['/endeavor/1.png', '/endeavor/endeavor.mp4'],
+  //   description:
+  //     'Wherenau allows PUV operators to use phones as GPS beacons for real-time tracking of public utility vehicles on specific routes.<br><br>This helps commuters know the location of their transport in real-time. The app leverages existing technologies like GPS and mobile data to provide an efficient solution.<br><br>Built using Vue and Quasar for the frontend, with Firebase handling the backend and real-time updates.',
+  //   main_discipline: {
+  //     name: 'Transport Technology',
+  //     icon: 'fas fa-bus',
+  //   },
+  //   disciplines: [
+  //     { name: 'Transport Technology', icon: 'fas fa-bus' },
+  //     { name: 'GPS Tracking', icon: 'fas fa-map-marker-alt' },
+  //     { name: 'Real-time Systems', icon: 'fas fa-clock' },
+  //     { name: 'Frontend Development', icon: 'fas fa-code' },
+  //     { name: 'Backend Development', icon: 'fas fa-server' },
+  //   ],
+  //   technologies: [
+  //     { name: 'Vue.js', icon: 'fas fa-vuejs' },
+  //     { name: 'Quasar', icon: 'fas fa-vuejs' },
+  //     { name: 'Firebase', icon: 'fas fa-fire' },
+  //     { name: 'GPS', icon: 'fas fa-map-marker-alt' },
+  //   ],
+  // },
 ];
