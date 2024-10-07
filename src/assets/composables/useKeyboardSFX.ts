@@ -12,27 +12,28 @@ export const useKeyboardSFX = (context: AudioContext, out: AudioNode) => {
 
   source.loop = true;
   source.connect(gainNode);
+  gainNode.connect(out);
 
   (async () => {
     buffers.push(
       await context.decodeAudioData(
-        await (await fetch('/keys1.wav')).arrayBuffer()
-      )
+        await (await fetch('/keys1.wav')).arrayBuffer(),
+      ),
     );
     buffers.push(
       await context.decodeAudioData(
-        await (await fetch('/keys2.wav')).arrayBuffer()
-      )
+        await (await fetch('/keys2.wav')).arrayBuffer(),
+      ),
     );
     buffers.push(
       await context.decodeAudioData(
-        await (await fetch('/keys3.wav')).arrayBuffer()
-      )
+        await (await fetch('/keys3.wav')).arrayBuffer(),
+      ),
     );
     buffers.push(
       await context.decodeAudioData(
-        await (await fetch('/keys4.wav')).arrayBuffer()
-      )
+        await (await fetch('/keys4.wav')).arrayBuffer(),
+      ),
     );
   })();
 
@@ -54,7 +55,7 @@ export const useKeyboardSFX = (context: AudioContext, out: AudioNode) => {
 
       const source = context.createBufferSource();
       source.buffer = selectedBuffer;
-      source.connect(out);
+      source.connect(gainNode);
       source.start();
     } catch (e) {
       console.log('Could not play keyboard sfx: ', e);
@@ -70,7 +71,7 @@ export const useKeyboardSFX = (context: AudioContext, out: AudioNode) => {
 
       const source = context.createBufferSource();
       source.buffer = selectedBuffer;
-      source.connect(context.destination);
+      source.connect(gainNode);
       source.start();
     } catch (e) {
       console.log('Could not play keyboard sfx: ', e);
