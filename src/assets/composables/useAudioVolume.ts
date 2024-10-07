@@ -26,6 +26,7 @@ const useAudioVolume = () => {
   const mute = () => {
     muted.value = true;
     // gainNode.gain.cancelScheduledValues(context.currentTime);
+    gainNode.gain.setValueAtTime(0.6, context.currentTime);
     gainNode.gain.linearRampToValueAtTime(0, context.currentTime + 0.75);
     LocalStorage.set('muted', true);
   };
@@ -33,6 +34,7 @@ const useAudioVolume = () => {
   const unmute = () => {
     muted.value = false;
     // gainNode.gain.cancelScheduledValues(context.currentTime);
+    gainNode.gain.setValueAtTime(0, context.currentTime);
     gainNode.gain.linearRampToValueAtTime(0.6, context.currentTime + 0.75);
     LocalStorage.set('muted', false);
   };
