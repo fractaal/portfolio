@@ -51,12 +51,7 @@
         <FancyWaves
           :colors="actualColors"
           :speed="wavesSpeed"
-          :bg-glow-color-rotation="music.realtime.bgGlowColorRotation"
           :noise-strength="noiseStrength"
-          :glow1-opacity="glow1Opacity"
-          :glow2-opacity="glow2Opacity"
-          :glow3-opacity="glow3Opacity"
-          :glow4-opacity="glow4Opacity"
         />
       </Suspense>
     </div>
@@ -244,6 +239,16 @@
       </div>
 
       <div>Colors: {{ music.realtime.colors }}</div>
+
+      <div>
+        Wave Speed Multiplier: {{ music.realtime.speedMult }} - Display
+        {{ speedMultSpring.position }}
+      </div>
+
+      <div>
+        Noise Strength: {{ music.realtime.noiseStrength }} - Display
+        {{ noiseStrengthSpring.position }}
+      </div>
     </section>
 
     <section
@@ -431,7 +436,7 @@ const hideEverything = ref(false);
 
 import { ref, onMounted, watch } from 'vue';
 import useAudioVolume from 'src/assets/composables/useAudioVolume';
-import { SpringRGB } from 'src/assets/spring';
+import { SpringRGB, Spring } from 'src/assets/spring';
 
 const glow1Opacity = ref(1);
 const glow2Opacity = ref(1);
@@ -582,86 +587,106 @@ const color3Spring = new SpringRGB();
 const color4Spring = new SpringRGB();
 const color5Spring = new SpringRGB();
 
-setInterval(() => {
-  color1Spring.setTarget(music.realtime.colors[0]);
-  color2Spring.setTarget(music.realtime.colors[1]);
-  color3Spring.setTarget(music.realtime.colors[2]);
-  color4Spring.setTarget(music.realtime.colors[3]);
-  color5Spring.setTarget(music.realtime.colors[4]);
+const speedMultSpring = new Spring(25, 10, 1);
+const noiseStrengthSpring = new Spring(25, 10, 1);
 
-  color1Spring.update(1 / 15);
-  color2Spring.update(1 / 15);
-  color3Spring.update(1 / 15);
-  color4Spring.update(1 / 15);
-  color5Spring.update(1 / 15);
+setInterval(
+  () => {
+    color1Spring.setTarget(music.realtime.colors[0]);
+    color2Spring.setTarget(music.realtime.colors[1]);
+    color3Spring.setTarget(music.realtime.colors[2]);
+    color4Spring.setTarget(music.realtime.colors[3]);
+    color5Spring.setTarget(music.realtime.colors[4]);
 
-  actualColors.value = [
-    color1Spring.position,
-    color2Spring.position,
-    color3Spring.position,
-    color4Spring.position,
-    color5Spring.position,
-  ];
+    speedMultSpring.setTarget(music.realtime.speedMult);
 
-  let a = volume.muted.value ? 1 : 0;
-  let twiceAsFastT =
-    (music.getPlaybackTime() % (60 / (music.bpm.value * (2 / 3)))) /
-    (60 / (music.bpm.value * (2 / 3)));
+    if (volume.muted.value) {
+      noiseStrengthSpring.setTarget(0.5);
+    } else {
+      noiseStrengthSpring.setTarget(music.realtime.noiseStrength);
+    }
 
-  let twiceAsFastFallbackT = (performance.now() % 2000) / 2000;
+    color1Spring.update(1 / 30);
+    color2Spring.update(1 / 30);
+    color3Spring.update(1 / 30);
+    color4Spring.update(1 / 30);
+    color5Spring.update(1 / 30);
 
-  const twiceAsFastFinalT =
-    twiceAsFastT + (twiceAsFastFallbackT - twiceAsFastT) * easeInOutExpo(a);
+    speedMultSpring.update(1 / 30);
+    noiseStrengthSpring.update(1 / 30);
 
-  blinkerOpacity.value = stepped(twiceAsFastFinalT) * 100;
+    actualColors.value = [
+      color1Spring.position,
+      color2Spring.position,
+      color3Spring.position,
+      color4Spring.position,
+      color5Spring.position,
+    ];
 
-  const timeMs = performance.now();
+    let a = volume.muted.value ? 1 : 0;
+    let twiceAsFastT =
+      (music.getPlaybackTime() % (60 / (music.bpm.value * (2 / 3)))) /
+      (60 / (music.bpm.value * (2 / 3)));
 
-  // multiplier = 0.5 + smoothHeartbeat(getPlaybackTime()) * 0.5;
+    let twiceAsFastFallbackT = (performance.now() % 2000) / 2000;
 
-  // multiplier gradually accelerates to 0
+    const twiceAsFastFinalT =
+      twiceAsFastT + (twiceAsFastFallbackT - twiceAsFastT) * easeInOutExpo(a);
 
-  multiplierAcceleration += 0.0025;
+    blinkerOpacity.value = stepped(twiceAsFastFinalT) * 100;
 
-  multiplier -= multiplierAcceleration;
+    const timeMs = performance.now();
 
-  let newMultiplier = 0.75 + smoothHeartbeat(music.getPlaybackTime()) * 0.25;
+    // multiplier = 0.5 + smoothHeartbeat(getPlaybackTime()) * 0.5;
 
-  if (multiplier < newMultiplier) {
-    multiplier = newMultiplier;
-    multiplierAcceleration = 0;
-  }
+    // multiplier gradually accelerates to 0
 
-  multiplier = Math.max(0.75, multiplier);
+    multiplierAcceleration += 0.0025;
 
-  recentMultipliers.unshift(multiplier);
-  recentMultipliers.length = 5;
+    multiplier -= multiplierAcceleration;
 
-  let sum = 0;
-  for (let i = 0; i < recentMultipliers.length; i++) {
-    sum += recentMultipliers[i];
-  }
+    let newMultiplier = 0.75 + smoothHeartbeat(music.getPlaybackTime()) * 0.25;
 
-  const actualMultiplier = Math.pow(sum / recentMultipliers.length, 3);
-  const fallbackMultiplierWhenMuted = 0.75;
+    if (multiplier < newMultiplier) {
+      multiplier = newMultiplier;
+      multiplierAcceleration = 0;
+    }
 
-  const finalMultiplier =
-    a * fallbackMultiplierWhenMuted + (1 - a) * actualMultiplier;
+    multiplier = Math.max(0.75, multiplier);
 
-  wavesSpeed.value = 0.5 + Math.pow(actualMultiplier, 5) * 2;
-  noiseStrength.value = 1 + Math.pow(actualMultiplier, 5) * 0.25;
+    recentMultipliers.unshift(multiplier);
+    recentMultipliers.length = 5;
 
-  wavesSpeed.value = a * 0.5 + (1 - a) * wavesSpeed.value;
-  noiseStrength.value = a * 1 + (1 - a) * noiseStrength.value;
+    let sum = 0;
+    for (let i = 0; i < recentMultipliers.length; i++) {
+      sum += recentMultipliers[i];
+    }
 
-  glow1Opacity.value = (Math.sin(timeMs / 1000) / 2 + 0.5) * finalMultiplier;
-  glow2Opacity.value =
-    (Math.sin(timeMs / 1000 + Math.PI / 2) / 2 + 0.5) * finalMultiplier;
-  glow3Opacity.value =
-    (Math.sin(timeMs / 1000 + Math.PI) / 2 + 0.5) * finalMultiplier;
-  glow4Opacity.value =
-    (Math.sin(timeMs / 1000 + (3 * Math.PI) / 2) / 2 + 0.5) * finalMultiplier;
-}, 25);
+    const actualMultiplier = Math.pow(sum / recentMultipliers.length, 3);
+    const fallbackMultiplierWhenMuted = 0.75;
+
+    const finalMultiplier =
+      a * fallbackMultiplierWhenMuted + (1 - a) * actualMultiplier;
+
+    wavesSpeed.value = 0.5 + Math.pow(actualMultiplier, 5) * 2;
+    noiseStrength.value = 1 + Math.pow(actualMultiplier, 5) * 0.25;
+
+    wavesSpeed.value = a * 0.5 + (1 - a) * wavesSpeed.value;
+    noiseStrength.value = a * 1 + (1 - a) * noiseStrength.value;
+
+    wavesSpeed.value = wavesSpeed.value * speedMultSpring.position;
+    noiseStrength.value = noiseStrength.value * noiseStrengthSpring.position;
+
+    glow1Opacity.value = (Math.sin(timeMs / 1000) / 2 + 0.5) * finalMultiplier;
+    glow2Opacity.value =
+      (Math.sin(timeMs / 1000 + Math.PI / 2) / 2 + 0.5) * finalMultiplier;
+    glow3Opacity.value =
+      (Math.sin(timeMs / 1000 + Math.PI) / 2 + 0.5) * finalMultiplier;
+    glow4Opacity.value =
+      (Math.sin(timeMs / 1000 + (3 * Math.PI) / 2) / 2 + 0.5) * finalMultiplier;
+  },
+  (1 / 30) * 1000,
+);
 
 function openYouTube() {
   window.open('https://www.youtube.com/@filmicvisuals');
